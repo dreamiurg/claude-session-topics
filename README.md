@@ -69,7 +69,7 @@ For the full story: [Session Topic Summaries in Claude Code Status Line][blog-po
 
 ---
 
-*Built by [@dreamiurg](https://github.com/dreamiurg) because remembering context shouldn't require context.*
+*Built by [@dreamiurg](http://dreamiurg.net/about) because remembering context shouldn't require context.*
 
 [blog-post]: http://dreamiurg.net/2026/01/08/claude-code-session-topics.html
 [claude-mem]: https://github.com/thedotmack/claude-mem
