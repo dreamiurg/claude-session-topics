@@ -5,6 +5,27 @@
 * add setup-statusline command for easy status line configuration ([33985de](https://github.com/dreamiurg/claude-session-topics/commit/33985de14995bbff7e2bb83c9a661ae760d6e222))
 * improve setup-statusline to be interactive and respect existing config ([085e69e](https://github.com/dreamiurg/claude-session-topics/commit/085e69ea71a18f19cd82db51134456a9b69ad0cc))
 
+## [1.3.0](https://github.com/dreamiurg/claude-session-topics/compare/claude-session-topics-v1.2.0...claude-session-topics-v1.3.0) (2026-01-09)
+
+
+### Features
+
+* add auto-install hooks for zero-config setup ([c24398a](https://github.com/dreamiurg/claude-session-topics/commit/c24398aa9fec5663670503626264aa9f8625f0df))
+* add setup-statusline command for easy status line configuration ([33985de](https://github.com/dreamiurg/claude-session-topics/commit/33985de14995bbff7e2bb83c9a661ae760d6e222))
+* improve setup-statusline to be interactive and respect existing config ([085e69e](https://github.com/dreamiurg/claude-session-topics/commit/085e69ea71a18f19cd82db51134456a9b69ad0cc))
+* improve setup-statusline to prioritize integration over replacement ([4159dbd](https://github.com/dreamiurg/claude-session-topics/commit/4159dbda763d55b3467a9fdd9e6640b2f4b6ebef))
+* initial release of claude-session-topics plugin ([ea8e602](https://github.com/dreamiurg/claude-session-topics/commit/ea8e6028dfe5bffcf77da09b92b066546816cdd0))
+
+
+### Bug Fixes
+
+* address code quality and documentation issues from review ([#3](https://github.com/dreamiurg/claude-session-topics/issues/3)) ([5ae1f51](https://github.com/dreamiurg/claude-session-topics/commit/5ae1f51744173ad186f2f8577c3d64b2bad0351b))
+* address second review round findings ([#4](https://github.com/dreamiurg/claude-session-topics/issues/4)) ([e2cca15](https://github.com/dreamiurg/claude-session-topics/commit/e2cca157ef83069f9645c44e2cf79099333b73ca))
+* correct plugin installation commands in README ([#6](https://github.com/dreamiurg/claude-session-topics/issues/6)) ([75d155c](https://github.com/dreamiurg/claude-session-topics/commit/75d155c64ea9f80a7963bd91955ffcf733b3bd88))
+* disable MD060 table alignment rule ([#2](https://github.com/dreamiurg/claude-session-topics/issues/2)) ([4ccd2a1](https://github.com/dreamiurg/claude-session-topics/commit/4ccd2a14de1705d0e80617990dd593d8ddb9dfd0))
+* markdown linting issues in setup-statusline command ([1aaac93](https://github.com/dreamiurg/claude-session-topics/commit/1aaac934306f38353474c634b40564669b3e976f))
+* remove detect-secrets hook (gitleaks is sufficient) ([#1](https://github.com/dreamiurg/claude-session-topics/issues/1)) ([3c7700f](https://github.com/dreamiurg/claude-session-topics/commit/3c7700f1c2bceb6e5c775d749e13667b9f1bf569))
+
 ## [1.1.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.5...v1.1.0) (2026-01-09)
 
 ### Features
