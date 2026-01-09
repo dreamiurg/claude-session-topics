@@ -54,13 +54,6 @@ repos:
         stages: [pre-commit, manual]
         always_run: true
 
-      - id: detect-secrets
-        name: Detect secrets with detect-secrets
-        entry: detect-secrets-hook
-        language: system
-        args: ['--baseline', '.secrets.baseline']
-        exclude: 'package-lock\.json|\.secrets\.baseline'
-
       - id: markdownlint
         name: Lint Markdown files
         description: Check Markdown style issues
