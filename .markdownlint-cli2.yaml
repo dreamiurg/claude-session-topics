@@ -31,6 +31,9 @@ config:
   MD026:
     punctuation: ".,;:!"
 
+  # Disable table column alignment check (too strict for simple tables)
+  MD060: false
+
 # Files to ignore
 ignores:
   - "node_modules/**"
