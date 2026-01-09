@@ -5,6 +5,13 @@
 * add setup-statusline command for easy status line configuration ([33985de](https://github.com/dreamiurg/claude-session-topics/commit/33985de14995bbff7e2bb83c9a661ae760d6e222))
 * improve setup-statusline to be interactive and respect existing config ([085e69e](https://github.com/dreamiurg/claude-session-topics/commit/085e69ea71a18f19cd82db51134456a9b69ad0cc))
 
+## [1.5.1](https://github.com/dreamiurg/claude-session-topics/compare/v1.5.0...v1.5.1) (2026-01-09)
+
+
+### Bug Fixes
+
+* use jsonpath for marketplace.json version updates ([#18](https://github.com/dreamiurg/claude-session-topics/issues/18)) ([4c00f17](https://github.com/dreamiurg/claude-session-topics/commit/4c00f1712be690c2e1386dce80407e2b6ec43e2e))
+
 ## [1.4.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.3.0...v1.4.0) (2026-01-09)
 
 
