@@ -1,0 +1,38 @@
+# markdownlint-cli2 configuration
+# https://github.com/DavidAnson/markdownlint
+
+config:
+  # Allow duplicate headings in different sections
+  MD024:
+    siblings_only: true
+
+  # Allow long lines in code blocks and tables
+  MD013:
+    line_length: 120
+    code_blocks: false
+    tables: false
+
+  # Allow inline HTML for badges and special formatting
+  MD033:
+    allowed_elements:
+      - br
+      - img
+      - a
+      - details
+      - summary
+      - kbd
+      - sub
+      - sup
+
+  # Allow emphasis as header
+  MD036: false
+
+  # Allow trailing punctuation in headers
+  MD026:
+    punctuation: ".,;:!"
+
+# Files to ignore
+ignores:
+  - "node_modules/**"
+  - "CHANGELOG.md"
+  - ".github/**"

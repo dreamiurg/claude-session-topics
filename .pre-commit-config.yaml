@@ -1,0 +1,75 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: no-commit-to-branch
+        name: Prevent commits to main/master
+        args: ['--branch', 'main', '--branch', 'master']
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of files
+      - id: check-yaml
+        name: Check YAML syntax
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+      - id: mixed-line-ending
+        name: Check line endings
+        args: ['--fix=lf']
+      - id: detect-private-key
+        name: Detect private keys
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        name: Lint shell scripts with shellcheck
+        args: ['--severity=warning', '-x']
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+      - id: shfmt
+        name: Format shell scripts with shfmt
+        args: ['-i', '4', '-ci', '-bn']
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.1.0
+    hooks:
+      - id: commitizen
+        name: Validate commit message format
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: Detect hardcoded secrets
+        description: Detect hardcoded secrets using Gitleaks
+        entry: gitleaks detect --redact --verbose --no-git --source=.
+        language: system
+        pass_filenames: false
+        stages: [pre-commit, manual]
+        always_run: true
+
+      - id: detect-secrets
+        name: Detect secrets with detect-secrets
+        entry: detect-secrets-hook
+        language: system
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'package-lock\.json|\.secrets\.baseline'
+
+      - id: markdownlint
+        name: Lint Markdown files
+        description: Check Markdown style issues
+        entry: markdownlint-cli2
+        language: system
+        types: [markdown]
+        pass_filenames: true
+
+# Global settings
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+fail_fast: false

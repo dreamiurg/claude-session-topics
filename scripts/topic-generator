@@ -1,0 +1,198 @@
+#!/bin/bash
+# Generate session topic summary using Haiku (async)
+# Usage: echo '{"session_id":"abc123", "transcript_path":"..."}' | topic-generator
+#
+# Throttled by message count - only generates new topic every N messages
+# Stores state in $TMPDIR/claude-topic-{session_id}.json
+# Topic generation runs in background to avoid blocking the hook
+
+set -uo pipefail # Removed -e to handle errors gracefully
+
+# Source common library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/../lib/common.sh"
+
+# Configuration
+readonly THRESHOLD=${CLAUDE_TOPIC_THRESHOLD:-10}
+readonly MAX_CHARS=50
+readonly CONTEXT_LINES=20 # Number of recent transcript entries to use
+readonly LOCK_TIMEOUT=60  # Seconds before lock is considered stale
+readonly CLAUDE_MEM_DB="$HOME/.claude-mem/claude-mem.db"
+readonly CLAUDE_MEM_LIMIT=5 # Number of observations to fetch
+
+# Get context from claude-mem observations (returns empty if unavailable)
+get_claudemem_context() {
+    local sid="$1"
+
+    # Check if database exists
+    [[ ! -f "$CLAUDE_MEM_DB" ]] && return 1
+
+    # Query observations for this session
+    local result
+    result=$(sqlite3 "$CLAUDE_MEM_DB" "
+        SELECT type, title, subtitle
+        FROM observations
+        WHERE sdk_session_id = '$sid'
+        ORDER BY created_at_epoch DESC
+        LIMIT $CLAUDE_MEM_LIMIT;
+    " 2>/dev/null) || return 1
+
+    # Check if we got any results
+    [[ -z "$result" ]] && return 1
+
+    # Format observations as context
+    echo "$result" | while IFS='|' read -r type title subtitle; do
+        [[ -n "$title" ]] && echo "[$type] $title: $subtitle"
+    done
+}
+
+# Read and validate input
+input=$(cat)
+if ! jq empty <<<"$input" 2>/dev/null; then
+    exit 0 # Invalid JSON
+fi
+
+session_id=$(jq -r '.session_id // empty' <<<"$input")
+[[ -z "$session_id" ]] && exit 0
+
+# Validate session_id format
+if ! validate_session_id "$session_id"; then
+    exit 0
+fi
+
+# Skip if this is a continuation from stop hook (prevent infinite loops)
+stop_hook_active=$(jq -r '.stop_hook_active // false' <<<"$input")
+[[ "$stop_hook_active" == "true" ]] && exit 0
+
+state_file=$(claude_state_file "$session_id")
+lock_file=$(claude_lock_file "$session_id")
+
+# Initialize state variables
+count=0
+topic=""
+error=""
+
+# Read existing state if available
+if [[ -f "$state_file" ]]; then
+    state=$(cat "$state_file")
+    count=$(jq -r '.count // 0' <<<"$state" 2>/dev/null) || count=0
+    topic=$(jq -r '.topic // ""' <<<"$state" 2>/dev/null) || topic=""
+    error=$(jq -r '.error // ""' <<<"$state" 2>/dev/null) || error=""
+    # Ensure count is numeric
+    [[ "$count" =~ ^[0-9]+$ ]] || count=0
+fi
+
+# Increment count
+count=$((count + 1))
+
+# Function to write state
+write_state() {
+    local cnt="$1"
+    local top="$2"
+    local err="$3"
+    jq -n \
+        --argjson count "$cnt" \
+        --arg topic "$top" \
+        --arg error "$err" \
+        --argjson ts "$(date +%s)" \
+        '{count: $count, topic: $topic, error: $error, generated_at: $ts}' >"$state_file"
+}
+
+# Check if we should generate a new topic
+if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
+    # Try to acquire lock atomically
+    if ! acquire_lock "$lock_file" "$LOCK_TIMEOUT"; then
+        # Lock held by another process, just update count and exit
+        write_state "$count" "$topic" "$error"
+        exit 0
+    fi
+
+    # Try claude-mem first (faster, richer context)
+    context=""
+    context_source=""
+    if context=$(get_claudemem_context "$session_id"); then
+        context_source="claude-mem"
+    else
+        # Fall back to transcript parsing
+        transcript_path=$(jq -r '.transcript_path // empty' <<<"$input")
+        if [[ -n "$transcript_path" ]]; then
+            transcript_path=$(validate_transcript_path "$transcript_path") || transcript_path=""
+        fi
+
+        if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
+            # Get last N lines, extract user/assistant messages
+            context=$(tail -n "$CONTEXT_LINES" "$transcript_path" 2>/dev/null |
+                jq -r 'select(.type == "user" or .type == "assistant") |
+                       if .type == "user" then "User: " + (.message.content // .content // "" | tostring | .[0:200])
+                       elif .type == "assistant" then "Claude: " + (.message.content // .content // "" | tostring | .[0:200])
+                       else empty end' 2>/dev/null |
+                head -c 2000)
+            context_source="transcript"
+        fi
+    fi
+
+    if [[ -n "$context" ]]; then
+        # Run topic generation in background
+        (
+            # Ensure lock is released on exit
+            trap 'release_lock "$lock_file"' EXIT
+
+            # Build prompt based on context source
+            if [[ "$context_source" == "claude-mem" ]]; then
+                prompt="Based on these session observations, generate a terse topic line.
+
+Format: \"<topic>: <activity>\" where topic is 2-3 words and activity uses gerund (-ing) form.
+Examples:
+- OAuth debug: fixing schema validation
+- Blog post: adding code snippets
+- tmux config: wiring session display
+- Zoom migration: rebasing PR
+
+Requirements:
+- Max ${MAX_CHARS} characters total
+- Output ONLY the topic line, nothing else
+- NEVER start with \"I\", \"Looking\", \"Based\", \"This\", or \"Theme\"
+
+Session observations:
+${context}"
+            else
+                prompt="Based on this Claude Code session, generate a terse topic line.
+
+Format: \"<topic>: <activity>\" where topic is 2-3 words and activity uses gerund (-ing) form.
+Examples:
+- OAuth debug: fixing schema validation
+- Blog post: adding code snippets
+- tmux config: wiring session display
+- Zoom migration: rebasing PR
+
+Requirements:
+- Max ${MAX_CHARS} characters total
+- Output ONLY the topic line, nothing else
+- NEVER start with \"I\", \"Looking\", \"Based\", \"This\", or \"Theme\"
+
+Recent conversation:
+${context}"
+            fi
+
+            new_topic=$(printf '%s' "$prompt" | claude --model haiku --print --no-session-persistence --tools "" 2>/dev/null | head -1)
+
+            # Update state file with new topic (only writer at this point due to lock)
+            if [[ -n "$new_topic" ]]; then
+                write_state "0" "$new_topic" ""
+            fi
+            # Lock released by trap
+        ) &
+
+        # Main process: write current state and exit immediately (don't race with background)
+        # The background process will overwrite when it completes
+        error=""
+    else
+        # No context, release lock immediately
+        release_lock "$lock_file"
+        error="waiting for conversation"
+    fi
+fi
+
+# Write state (hook returns immediately)
+write_state "$count" "$topic" "$error"

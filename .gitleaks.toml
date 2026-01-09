@@ -1,0 +1,26 @@
+# Gitleaks configuration
+title = "Gitleaks config for claude-session-topics"
+
+[extend]
+# Use default gitleaks rules
+useDefault = true
+
+[allowlist]
+description = "Allowlisted files and patterns"
+
+# Allowlist specific paths
+paths = [
+  '''\.git/''',
+  '''node_modules/''',
+  '''\.claude-plugin/marketplace\.json''',
+  '''package-lock\.json''',
+]
+
+# Allowlist example URLs and documentation patterns
+regexes = [
+  '''example\.com''',
+  '''user@example\.com''',
+  '''<session_id>''',
+  '''abc123''',
+  '''[a-f0-9]{8}-0000-0000-0000-[a-f0-9]{12}''',
+]

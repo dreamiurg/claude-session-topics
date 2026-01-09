@@ -1,0 +1,29 @@
+#!/bin/bash
+# Clean up session state files on session end
+# Usage: echo '{"session_id":"abc123"}' | session-cleanup
+
+set -uo pipefail
+
+# Source common library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/../lib/common.sh"
+
+# Read and validate input
+input=$(cat)
+session_id=$(jq -r '.session_id // empty' <<<"$input" 2>/dev/null) || exit 0
+[[ -z "$session_id" ]] && exit 0
+
+# Validate session_id format
+if ! validate_session_id "$session_id"; then
+    exit 0
+fi
+
+# Clean up state and lock files
+state_file=$(claude_state_file "$session_id")
+lock_file=$(claude_lock_file "$session_id")
+
+rm -f "$state_file" 2>/dev/null
+rmdir "$lock_file" 2>/dev/null || rm -rf "$lock_file" 2>/dev/null
+
+exit 0

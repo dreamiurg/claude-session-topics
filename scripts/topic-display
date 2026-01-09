@@ -1,0 +1,53 @@
+#!/bin/bash
+# Display current session topic from state file
+# Usage: topic-display <session_id>
+# Returns: topic string suitable for status displays, or empty on error
+
+set -uo pipefail
+
+# Source common library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/../lib/common.sh"
+
+session_id="${1:-}"
+
+# Silent exit if no session_id
+[[ -z "$session_id" ]] && exit 0
+
+# Validate session_id format
+if ! validate_session_id "$session_id"; then
+    exit 0
+fi
+
+state_file=$(claude_state_file "$session_id")
+
+# Check if state file exists
+[[ ! -f "$state_file" ]] && exit 0
+
+# Read state using individual jq calls to avoid TSV parsing issues
+topic=$(jq -r '.topic // ""' "$state_file" 2>/dev/null) || topic=""
+error=$(jq -r '.error // ""' "$state_file" 2>/dev/null) || error=""
+generated_at=$(jq -r '.generated_at // 0' "$state_file" 2>/dev/null) || generated_at=0
+
+# If we have a topic, calculate age and display
+if [[ -n "$topic" && "$topic" != "null" ]]; then
+    if [[ "$generated_at" -gt 0 ]]; then
+        now=$(date +%s)
+        age=$((now - generated_at))
+
+        if [[ $age -lt 60 ]]; then
+            age_str="${age}s"
+        elif [[ $age -lt 3600 ]]; then
+            age_str="$((age / 60))m"
+        else
+            age_str="$((age / 3600))h"
+        fi
+
+        printf '%s (%s)' "$topic" "$age_str"
+    else
+        printf '%s' "$topic"
+    fi
+elif [[ -n "$error" && "$error" != "null" ]]; then
+    printf '%s' "$error"
+fi

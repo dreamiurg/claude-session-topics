@@ -1,0 +1,20 @@
+{
+  "name": "claude-session-topics",
+  "version": "1.0.0",
+  "description": "Automatic AI-powered session topic generation for Claude Code sessions",
+  "author": {
+    "name": "dreamiurg",
+    "email": "dreamiurg@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/dreamiurg/claude-session-topics",
+  "repository": "https://github.com/dreamiurg/claude-session-topics",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "session-management",
+    "topic-generation",
+    "productivity",
+    "ai-assistant"
+  ],
+  "hooks": "./hooks"
+}

@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Test artifacts
+*.log
+*.tmp
+.coverage
+coverage/
+
+# Secrets baseline (if using detect-secrets)
+# Uncomment if you don't want to track baseline
+# .secrets.baseline
+
+# Build artifacts
+dist/
+build/

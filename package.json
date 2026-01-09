@@ -1,0 +1,29 @@
+{
+  "name": "claude-session-topics",
+  "version": "1.0.0",
+  "description": "Claude Code plugin for automatic AI-powered session topic generation",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dreamiurg/claude-session-topics.git"
+  },
+  "keywords": [
+    "claude-code",
+    "session-management",
+    "topic-generation",
+    "productivity",
+    "ai-assistant"
+  ],
+  "author": "dreamiurg",
+  "license": "MIT",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.0.0"
+  },
+  "scripts": {
+    "release": "semantic-release"
+  }
+}
