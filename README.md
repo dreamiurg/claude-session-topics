@@ -175,6 +175,9 @@ All settings are environment variables—no config files to manage:
 |----------|---------|--------------|
 | `CLAUDE_TOPIC_THRESHOLD` | `10` | Messages between regeneration |
 | `CLAUDE_TOPIC_MAX_CHARS` | `50` | Max topic length |
+| `CLAUDE_TOPIC_CONTEXT_LINES` | `20` | Lines from transcript for fallback context |
+| `CLAUDE_TOPIC_LOCK_TIMEOUT` | `60` | Seconds before stale lock is broken |
+| `CLAUDE_TOPIC_MEM_LIMIT` | `5` | Max claude-mem observations to query |
 | `CLAUDE_TOPIC_DEBUG` | `0` | Set to `1` for stderr logging |
 | `CLAUDE_MEM_DB` | `~/.claude-mem/claude-mem.db` | Path to claude-mem DB |
 

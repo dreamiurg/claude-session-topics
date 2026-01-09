@@ -32,4 +32,11 @@ marketplaceJson.plugins[0].version = version;
 fs.writeFileSync(marketplaceJsonPath, JSON.stringify(marketplaceJson, null, 2) + '\n');
 console.log(`✓ Updated ${marketplaceJsonPath}`);
 
+// Update package.json
+const packageJsonPath = path.join(__dirname, '..', 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+packageJson.version = version;
+fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+console.log(`✓ Updated ${packageJsonPath}`);
+
 console.log(`\nAll versions updated to ${version}`);
