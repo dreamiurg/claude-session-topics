@@ -1,3 +1,10 @@
+## [1.2.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.1.0...v1.2.0) (2026-01-09)
+
+### Features
+
+* add setup-statusline command for easy status line configuration ([33985de](https://github.com/dreamiurg/claude-session-topics/commit/33985de14995bbff7e2bb83c9a661ae760d6e222))
+* improve setup-statusline to be interactive and respect existing config ([085e69e](https://github.com/dreamiurg/claude-session-topics/commit/085e69ea71a18f19cd82db51134456a9b69ad0cc))
+
 ## [1.1.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.5...v1.1.0) (2026-01-09)
 
 ### Features
