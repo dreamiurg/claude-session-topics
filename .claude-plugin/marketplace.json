@@ -11,7 +11,7 @@
         "source": "url",
         "url": "https://github.com/dreamiurg/claude-session-topics.git"
       },
-      "description": "Automatic AI-powered session topic generation for Claude Code sessions",
+      "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
       "version": "1.5.1"
     }
   ]
