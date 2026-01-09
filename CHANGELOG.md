@@ -5,6 +5,13 @@
 * add setup-statusline command for easy status line configuration ([33985de](https://github.com/dreamiurg/claude-session-topics/commit/33985de14995bbff7e2bb83c9a661ae760d6e222))
 * improve setup-statusline to be interactive and respect existing config ([085e69e](https://github.com/dreamiurg/claude-session-topics/commit/085e69ea71a18f19cd82db51134456a9b69ad0cc))
 
+## [1.5.4](https://github.com/dreamiurg/claude-session-topics/compare/v1.5.3...v1.5.4) (2026-01-09)
+
+
+### Bug Fixes
+
+* support ccstatusline stdin JSON for session ID ([#25](https://github.com/dreamiurg/claude-session-topics/issues/25)) ([b1390f3](https://github.com/dreamiurg/claude-session-topics/commit/b1390f356f4bd890befc4bb1423983b5127f8430))
+
 ## [1.5.3](https://github.com/dreamiurg/claude-session-topics/compare/v1.5.2...v1.5.3) (2026-01-09)
 
 
