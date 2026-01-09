@@ -4,41 +4,71 @@ description: Configure Claude Code status line to display session topics
 
 # Setup Status Line for Session Topics
 
-Configure the user's Claude Code status line to display the current session topic.
+Help the user configure their Claude Code status line to display session topics. This is an interactive setup that respects existing configurations.
 
 ## Instructions
 
-1. Read the user's `~/.claude/settings.json` file
+### Step 1: Examine Current Configuration
 
-2. Check the current `statusLine` configuration (if any)
+Read `~/.claude/settings.json` and analyze the current `statusLine` configuration.
 
-3. Update `settings.json` to set the statusLine to use topic-display:
+Possible states:
+- **No statusLine configured** - user has default/no status line
+- **Using ccstatusline** - command contains `ccstatusline` (popular status line tool)
+- **Using topic-display** - already configured for this plugin
+- **Custom configuration** - some other custom status line command
+
+### Step 2: Present Findings and Options
+
+Based on what you find, present the situation to the user using AskUserQuestion:
+
+**If no statusLine configured:**
+- Offer to add topic display as the status line
+- Show what the configuration will look like
+
+**If using ccstatusline or another tool:**
+- Explain they have an existing status line tool
+- Offer options:
+  1. Replace with topic-display (simple, just shows topic)
+  2. Keep current setup and show manual integration instructions
+  3. Cancel - make no changes
+
+**If already using topic-display:**
+- Inform user it's already configured
+- Offer to show current configuration or make adjustments
+
+### Step 3: Apply Changes (only with user approval)
+
+If user approves changes, update `~/.claude/settings.json` with:
 
 ```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "${CLAUDE_PLUGINS_DIR}/claude-session-topics@dreamiurg/scripts/topic-display $CLAUDE_SESSION_ID"
-  }
+"statusLine": {
+  "type": "command",
+  "command": "~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display \"$CLAUDE_SESSION_ID\""
 }
 ```
 
-Note: `${CLAUDE_PLUGINS_DIR}` expands to the user's plugin cache directory (typically `~/.claude/plugins/cache`).
+Important: Use the glob pattern `*/` for version to ensure it works across plugin updates.
 
-4. If the user already has a custom statusLine configured, ask if they want to:
-   - Replace it with topic display
-   - Keep their existing configuration (and show them how to manually integrate)
+### Step 4: Confirm and Explain
 
-5. After updating, inform the user:
-   - The status line will now show the current session topic
-   - Topics are generated every 10 messages (configurable via `CLAUDE_TOPIC_THRESHOLD`)
-   - They may need to restart Claude Code for changes to take effect
+After making changes (or if user chose not to change):
 
-6. If anything goes wrong, explain the manual setup option:
-   - Add to `~/.claude/settings.json`:
-   ```json
-   "statusLine": {
-     "type": "command",
-     "command": "~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display $CLAUDE_SESSION_ID"
-   }
-   ```
+- Confirm what was done
+- Explain that topics appear after ~10 messages of conversation
+- Note they may need to restart Claude Code for changes to take effect
+- Mention `CLAUDE_TOPIC_DEBUG=1` for troubleshooting
+
+### Manual Integration Note
+
+If user wants to keep their existing status line but add topics, suggest they can:
+1. Create a wrapper script that combines their existing command with topic-display
+2. Or pipe outputs together in their statusLine command
+
+Example wrapper approach:
+```bash
+#!/bin/bash
+topic=$(~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display "$CLAUDE_SESSION_ID" 2>/dev/null)
+existing=$(npx -y ccstatusline@latest 2>/dev/null)
+echo "${topic:+$topic | }$existing"
+```
