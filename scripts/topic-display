@@ -1,6 +1,11 @@
 #!/bin/bash
 # Display current session topic from state file
-# Usage: topic-display <session_id>
+# Usage: topic-display [session_id]
+#
+# Session ID can be provided via:
+#   1. Command-line argument: topic-display <session_id>
+#   2. Stdin JSON (ccstatusline format): {"session_id": "..."}
+#
 # Returns: topic string suitable for status displays, or empty on error
 
 set -uo pipefail
@@ -11,6 +16,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 
 session_id="${1:-}"
+
+# If no argument provided, try reading from stdin (ccstatusline passes JSON via stdin)
+if [[ -z "$session_id" ]] && [[ ! -t 0 ]]; then
+    stdin_data=$(cat)
+    if [[ -n "$stdin_data" ]]; then
+        session_id=$(echo "$stdin_data" | jq -r '.session_id // empty' 2>/dev/null) || session_id=""
+    fi
+fi
 
 # Silent exit if no session_id
 [[ -z "$session_id" ]] && exit 0
