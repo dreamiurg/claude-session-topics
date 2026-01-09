@@ -55,12 +55,19 @@ if [[ -n "$topic" && "$topic" != "null" ]]; then
         now=$(date +%s)
         age=$((now - generated_at))
 
-        if [[ $age -lt 60 ]]; then
-            age_str="${age}s"
+        # Rough age estimates - don't count beans
+        if [[ $age -lt 300 ]]; then
+            age_str="now"
+        elif [[ $age -lt 900 ]]; then
+            age_str="~10m"
+        elif [[ $age -lt 1800 ]]; then
+            age_str="~20m"
         elif [[ $age -lt 3600 ]]; then
-            age_str="$((age / 60))m"
+            age_str="~45m"
+        elif [[ $age -lt 7200 ]]; then
+            age_str="~1h"
         else
-            age_str="$((age / 3600))h"
+            age_str="~$((age / 3600))h"
         fi
 
         printf '%s (%s)' "$topic" "$age_str"
