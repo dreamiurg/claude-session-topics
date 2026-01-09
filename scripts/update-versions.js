@@ -9,6 +9,13 @@ if (!version) {
   process.exit(1);
 }
 
+// Validate semver format (basic check)
+const semverRegex = /^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$/;
+if (!semverRegex.test(version)) {
+  console.error(`Error: Invalid version format "${version}". Expected semver (e.g., 1.2.3)`);
+  process.exit(1);
+}
+
 console.log(`Updating version to ${version}`);
 
 // Update plugin.json

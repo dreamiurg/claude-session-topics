@@ -15,6 +15,5 @@
     "topic-generation",
     "productivity",
     "ai-assistant"
-  ],
-  "hooks": "./hooks"
+  ]
 }
