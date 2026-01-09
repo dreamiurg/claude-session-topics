@@ -12,7 +12,7 @@
         "url": "https://github.com/dreamiurg/claude-session-topics.git"
       },
       "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
-      "version": "1.6.0"
+      "version": "1.7.0"
     }
   ]
 }
