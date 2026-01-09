@@ -15,16 +15,22 @@ For the full story behind this project, check out my blog post:
 
 ## How It Works
 
-```mermaid
-flowchart LR
-    A[Message] --> B{Every 10 msgs}
-    B -->|Yes| C[Generate Topic]
-    B -->|No| D[Count++]
-    C --> E[Status Line]
-```
+**Hooks:**
 
-Every message triggers the hook, but topic generation only fires every 10 messages
-(configurable). The API call runs in the background—your hook returns in under 50ms.
+- **Stop** — Fires after each assistant response. Increments counter, and every N
+  messages (default 10) spawns a background process to generate a new topic via
+  Haiku. Returns in <50ms; generation happens async.
+- **SessionEnd** — Cleans up state files when session terminates.
+
+**Context sources** (tried in order):
+
+1. **claude-mem** — Queries `observations` table by `sdk_session_id` for semantic
+   context about what you've accomplished. Requires [claude-mem][claude-mem].
+2. **Transcript** — Falls back to parsing last N lines of Claude Code transcript
+   for user/assistant messages.
+
+**State:** Stored in `$TMPDIR/claude-topic-<session_id>.json` with count, topic,
+error, and timestamp. Lock files (`*.lock`) prevent concurrent generation.
 
 ## Example Topics
 
@@ -63,15 +69,6 @@ All settings are environment variables:
 | `CLAUDE_TOPIC_MAX_CHARS` | `50` | Max topic length |
 | `CLAUDE_TOPIC_DEBUG` | `0` | Set to `1` for stderr logging |
 | `CLAUDE_MEM_DB` | `~/.claude-mem/claude-mem.db` | Path to claude-mem DB |
-
-## Context Sources
-
-The plugin tries two sources in order:
-
-1. **claude-mem** (preferred) — If you have [claude-mem][claude-mem] installed,
-   we query its SQLite database for rich semantic context.
-
-2. **Transcript** (fallback) — Parses Claude Code transcript for recent messages.
 
 ## Troubleshooting
 
