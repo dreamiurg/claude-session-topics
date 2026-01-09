@@ -1,7 +1,7 @@
 {
   "post-install": {
     "command": "bash",
-    "args": ["-c", "echo 'claude-session-topics installed successfully. See README for tmux integration setup.'"],
+    "args": ["-c", "echo 'claude-session-topics installed successfully. See README for hook configuration.'"],
     "description": "Post-installation message"
   }
 }
