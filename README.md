@@ -17,22 +17,13 @@ For the full story behind this project, check out my blog post:
 
 ## How It Works
 
-```text
-┌─────────────────┐      ┌──────────────────┐      ┌─────────────┐
-│   Stop Hook     │─────▶│  topic-generator │─────▶│   Haiku     │
-│ (hooks.json)    │      │   (async spawn)  │      │   Model     │
-└─────────────────┘      └────────┬─────────┘      └──────┬──────┘
-                                  │                       │
-                                  ▼                       │
-                         ┌───────────────────┐            │
-                         │   State File      │◀───────────┘
-                         │ ($TMPDIR/*.json)  │
-                         └────────┬──────────┘
-                                  │
-                                  ▼
-                         ┌───────────────────┐      ┌─────────────┐
-                         │  topic-display    │─────▶│ Status Line │
-                         └───────────────────┘      └─────────────┘
+```mermaid
+flowchart LR
+    A[Stop Hook] --> B[topic-generator]
+    B --> C[Haiku Model]
+    C --> D[State File]
+    D --> E[topic-display]
+    E --> F[Status Line]
 ```
 
 **[Stop Hook](hooks/hooks.json)** — Fires after each Claude response. Pipes JSON
