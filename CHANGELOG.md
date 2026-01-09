@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.0...v1.0.1) (2026-01-09)
+
+### Bug Fixes
+
+* remove detect-secrets hook (gitleaks is sufficient) ([#1](https://github.com/dreamiurg/claude-session-topics/issues/1)) ([3c7700f](https://github.com/dreamiurg/claude-session-topics/commit/3c7700f1c2bceb6e5c775d749e13667b9f1bf569))
+
 ## 1.0.0 (2026-01-09)
 
 ### Features
