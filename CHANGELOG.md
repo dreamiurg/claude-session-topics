@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.1...v1.0.2) (2026-01-09)
+
+### Bug Fixes
+
+* disable MD060 table alignment rule ([#2](https://github.com/dreamiurg/claude-session-topics/issues/2)) ([4ccd2a1](https://github.com/dreamiurg/claude-session-topics/commit/4ccd2a14de1705d0e80617990dd593d8ddb9dfd0))
+
 ## [1.0.1](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.0...v1.0.1) (2026-01-09)
 
 ### Bug Fixes
