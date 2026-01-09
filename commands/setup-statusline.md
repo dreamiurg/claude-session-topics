@@ -1,54 +1,68 @@
 ---
-description: Configure Claude Code status line to display session topics
+description: Configure ccstatusline to display session topics
 ---
 
 # Setup Status Line for Session Topics
 
-Add session topic display to your Claude Code status line.
+Configure ccstatusline to show session topics as a second line.
 
-## Default Setup (ccstatusline users)
+## Instructions
 
-Most users have ccstatusline configured. The default setup adds topics as a second
-line below ccstatusline output.
+### Step 1: Check ccstatusline config
 
-### Step 1: Create the wrapper script
+Read `~/.config/ccstatusline/settings.json` to see current configuration.
 
-Create `~/.claude/bin/statusline-with-topics`:
+### Step 2: Add custom-command widget
 
-```bash
-#!/bin/bash
-# Combined status line: ccstatusline + session topic
-# Line 1: ccstatusline metrics (model, tokens, git, etc.)
-# Line 2: Session topic with age indicator
-
-input=$(cat)
-echo "$input" | npx -y ccstatusline@latest 2>/dev/null
-
-topic=$(~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display "$CLAUDE_SESSION_ID" 2>/dev/null)
-[[ -n "$topic" ]] && echo "# $topic"
-```
-
-Make it executable:
-
-```bash
-mkdir -p ~/.claude/bin
-chmod +x ~/.claude/bin/statusline-with-topics
-```
-
-### Step 2: Update settings.json
-
-Change the statusLine in `~/.claude/settings.json`:
+Add a second line with a `custom-command` widget pointing to the plugin's topic-display script:
 
 ```json
-"statusLine": {
-  "type": "command",
-  "command": "~/.claude/bin/statusline-with-topics"
+{
+  "id": "session-topic",
+  "type": "custom-command",
+  "rawValue": true,
+  "commandPath": "~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display",
+  "color": "cyan"
 }
 ```
 
-### Step 3: Restart Claude Code
+The widget goes in the `lines` array as a new line (array of widgets).
 
-Topics appear after ~10 messages when there's enough context to summarize.
+### Step 3: Example configuration
+
+A typical ccstatusline config with topics looks like:
+
+```json
+{
+  "version": 3,
+  "lines": [
+    [
+      {"type": "context-percentage", "color": "brightRed", "rawValue": true},
+      {"type": "current-working-dir", "color": "brightBlue", "rawValue": true},
+      {"type": "git-branch", "color": "green", "rawValue": true}
+    ],
+    [
+      {
+        "id": "session-topic",
+        "type": "custom-command",
+        "rawValue": true,
+        "commandPath": "~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display",
+        "color": "cyan"
+      }
+    ]
+  ]
+}
+```
+
+### Step 4: Apply changes
+
+After editing `~/.config/ccstatusline/settings.json`, the user needs to restart Claude Code
+for changes to take effect. Topics appear after ~10 messages of conversation.
+
+## Alternative: Use ccstatusline TUI
+
+Users can also run `npx ccstatusline@latest` to open the interactive configuration UI
+and add a custom command widget there.
 
 ## Troubleshooting
 
@@ -57,9 +71,3 @@ Enable debug logging:
 ```bash
 export CLAUDE_TOPIC_DEBUG=1
 ```
-
-## Other Configurations
-
-If the user doesn't have ccstatusline or wants a different setup, adapt the wrapper
-script to their needs. The key is calling `topic-display` with `$CLAUDE_SESSION_ID`
-and outputting the result as a second line.
