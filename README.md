@@ -30,8 +30,8 @@ To force a topic refresh anytime:
 Topics follow a `<theme>: <activity>` format:
 
 ```text
-OAuth debug: fixing schema validation
-Blog post: adding code snippets
+OAuth debug: fixing validation
+Blog post: adding snippets
 API refactor: updating endpoints
 ```
 
@@ -44,6 +44,7 @@ Topics include an age indicator so you know how fresh they are.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CLAUDE_TOPIC_THRESHOLD` | `10` | Messages between regeneration |
+| `CLAUDE_TOPIC_CONTEXT_LINES` | `100` | Transcript lines to analyze |
 | `CLAUDE_TOPIC_MAX_CHARS` | `50` | Max topic length |
 | `CLAUDE_TOPIC_DEBUG` | `0` | Enable debug logging |
 
