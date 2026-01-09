@@ -67,10 +67,6 @@ A [stop hook](hooks/hooks.json) fires after each Claude response, triggering
 
 For the full story: [Session Topic Summaries in Claude Code Status Line][blog-post]
 
-## License
-
-[MIT](LICENSE)
-
 ---
 
 *Built by [@dreamiurg](https://github.com/dreamiurg) because remembering context shouldn't require context.*
