@@ -4,7 +4,8 @@ description: Configure Claude Code status line to display session topics
 
 # Setup Status Line for Session Topics
 
-Help the user configure their Claude Code status line to display session topics. This is an interactive setup that respects existing configurations.
+Help the user configure their Claude Code status line to display session topics.
+This is an interactive setup that respects existing configurations.
 
 ## Instructions
 
@@ -13,6 +14,7 @@ Help the user configure their Claude Code status line to display session topics.
 Read `~/.claude/settings.json` and analyze the current `statusLine` configuration.
 
 Possible states:
+
 - **No statusLine configured** - user has default/no status line
 - **Using ccstatusline** - command contains `ccstatusline` (popular status line tool)
 - **Using topic-display** - already configured for this plugin
@@ -23,10 +25,12 @@ Possible states:
 Based on what you find, present the situation to the user using AskUserQuestion:
 
 **If no statusLine configured:**
+
 - Offer to add topic display as the status line
 - Show what the configuration will look like
 
 **If using ccstatusline or another tool:**
+
 - Explain they have an existing status line tool
 - Offer options:
   1. Replace with topic-display (simple, just shows topic)
@@ -34,6 +38,7 @@ Based on what you find, present the situation to the user using AskUserQuestion:
   3. Cancel - make no changes
 
 **If already using topic-display:**
+
 - Inform user it's already configured
 - Offer to show current configuration or make adjustments
 
@@ -62,10 +67,12 @@ After making changes (or if user chose not to change):
 ### Manual Integration Note
 
 If user wants to keep their existing status line but add topics, suggest they can:
+
 1. Create a wrapper script that combines their existing command with topic-display
 2. Or pipe outputs together in their statusLine command
 
 Example wrapper approach:
+
 ```bash
 #!/bin/bash
 topic=$(~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display "$CLAUDE_SESSION_ID" 2>/dev/null)
