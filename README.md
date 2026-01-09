@@ -10,27 +10,50 @@ were doing. This plugin fixes that.
 Claude Code sessions. Topics appear in your status line, shell prompt, or wherever
 you need them—so you can context-switch without the mental overhead.
 
+![Claude Code session topics in tmux status line](http://dreamiurg.net/images/claude-session-topics.png)
+
 For the full story behind this project, check out my blog post:
 [Session Topic Summaries in Claude Code Status Line][blog-post].
 
 ## How It Works
 
-**Hooks:**
+```text
+┌─────────────────┐      ┌──────────────────┐      ┌─────────────┐
+│   Stop Hook     │─────▶│  topic-generator │─────▶│   Haiku     │
+│ (hooks.json)    │      │   (async spawn)  │      │   Model     │
+└─────────────────┘      └────────┬─────────┘      └──────┬──────┘
+                                  │                       │
+                                  ▼                       │
+                         ┌───────────────────┐            │
+                         │   State File      │◀───────────┘
+                         │ ($TMPDIR/*.json)  │
+                         └────────┬──────────┘
+                                  │
+                                  ▼
+                         ┌───────────────────┐      ┌─────────────┐
+                         │  topic-display    │─────▶│ Status Line │
+                         └───────────────────┘      └─────────────┘
+```
 
-- **Stop** — Fires after each assistant response. Increments counter, and every N
-  messages (default 10) spawns a background process to generate a new topic via
-  Haiku. Returns in <50ms; generation happens async.
-- **SessionEnd** — Cleans up state files when session terminates.
+**[Stop Hook](hooks/hooks.json)** — Fires after each Claude response. Pipes JSON
+context to [topic-generator](scripts/topic-generator).
 
-**Context sources** (tried in order):
+**[topic-generator](scripts/topic-generator)** — Increments message counter.
+Every N messages (default 10), spawns background process that:
 
-1. **claude-mem** — Queries `observations` table by `sdk_session_id` for semantic
-   context about what you've accomplished. Requires [claude-mem][claude-mem].
-2. **Transcript** — Falls back to parsing last N lines of Claude Code transcript
-   for user/assistant messages.
+1. Queries [claude-mem][claude-mem] for session observations (if available)
+2. Falls back to parsing transcript for recent user/assistant messages
+3. Sends context to **Haiku** model with a prompt requesting `<topic>: <activity>` format
+4. Writes result to state file: `$TMPDIR/claude-topic-<session_id>.json`
 
-**State:** Stored in `$TMPDIR/claude-topic-<session_id>.json` with count, topic,
-error, and timestamp. Lock files (`*.lock`) prevent concurrent generation.
+Returns in <50ms (generation is async). Lock files prevent concurrent generation.
+
+**[topic-display](scripts/topic-display)** — Reads state file, outputs topic with
+age indicator (e.g., `OAuth debug: fixing schema (5m)`). Called by your status
+line command.
+
+**[SessionEnd Hook](hooks/hooks.json)** — Runs [session-cleanup](scripts/session-cleanup)
+to remove state and lock files when session terminates.
 
 ## Example Topics
 
