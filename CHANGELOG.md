@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.2...v1.0.3) (2026-01-09)
+
+### Bug Fixes
+
+* address code quality and documentation issues from review ([#3](https://github.com/dreamiurg/claude-session-topics/issues/3)) ([5ae1f51](https://github.com/dreamiurg/claude-session-topics/commit/5ae1f51744173ad186f2f8577c3d64b2bad0351b))
+
 ## [1.0.2](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.1...v1.0.2) (2026-01-09)
 
 ### Bug Fixes
