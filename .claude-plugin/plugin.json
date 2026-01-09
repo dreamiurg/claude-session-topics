@@ -1,6 +1,6 @@
 {
   "name": "claude-session-topics",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
   "author": {
     "name": "dreamiurg",
