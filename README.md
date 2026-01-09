@@ -19,6 +19,12 @@ AI-generated topic summaries for your Claude Code sessions. See what each sessio
 
 That's it. Topics appear automatically after a few messages.
 
+To force a topic refresh anytime:
+
+```bash
+/claude-session-topics:regenerate-topic
+```
+
 ## What You Get
 
 Topics follow a `<theme>: <activity>` format:
