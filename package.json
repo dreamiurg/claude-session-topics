@@ -1,7 +1,7 @@
 {
   "name": "claude-session-topics",
   "version": "1.5.1",
-  "description": "Claude Code plugin for automatic AI-powered session topic generation",
+  "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
   "private": true,
   "repository": {
     "type": "git",
