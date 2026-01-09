@@ -54,10 +54,20 @@ A typical ccstatusline config with topics looks like:
 }
 ```
 
-### Step 4: Apply changes
+### Step 4: Verify setup
 
-After editing `~/.config/ccstatusline/settings.json`, the user needs to restart Claude Code
-for changes to take effect. Topics appear after ~10 messages of conversation.
+After making changes, verify everything is working by running the topic-display script:
+
+```bash
+~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/topic-display "$CLAUDE_SESSION_ID"
+```
+
+This should output something like `New session: gathering context` for new sessions,
+or the actual topic if one has been generated.
+
+Tell the user: "Setup complete. Your status line will show 'New session: gathering context'
+initially. After a few messages, it will update with an AI-generated topic summarizing
+your conversation. Restart Claude Code for changes to take effect."
 
 ## Alternative: Use ccstatusline TUI
 
