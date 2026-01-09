@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.4...v1.0.5) (2026-01-09)
+
+### Bug Fixes
+
+* correct plugin installation commands in README ([#6](https://github.com/dreamiurg/claude-session-topics/issues/6)) ([75d155c](https://github.com/dreamiurg/claude-session-topics/commit/75d155c64ea9f80a7963bd91955ffcf733b3bd88))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
