@@ -64,11 +64,11 @@ Session topics: writing README
 ### Installation
 
 ```bash
-# Add the marketplace
-claude /marketplace-add https://github.com/dreamiurg/claude-session-topics.git
+# Add the marketplace (run inside Claude Code)
+/plugin marketplace add dreamiurg/claude-session-topics
 
 # Install the plugin
-claude /plugin-install claude-session-topics
+/plugin install claude-session-topics@dreamiurg
 ```
 
 Or clone manually:
