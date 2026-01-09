@@ -71,34 +71,13 @@ Session topics: writing README
 /plugin install claude-session-topics@dreamiurg
 ```
 
+That's it! The plugin automatically registers hooks for topic generation.
+
 Or clone manually:
 
 ```bash
 git clone https://github.com/dreamiurg/claude-session-topics.git \
   ~/.claude/plugins/claude-session-topics
-```
-
-### Configure Hooks
-
-Add to your `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "cat | ~/.claude/plugins/claude-session-topics/scripts/topic-generator"
-      }]
-    }],
-    "SessionEnd": [{
-      "hooks": [{
-        "type": "command",
-        "command": "cat | ~/.claude/plugins/claude-session-topics/scripts/session-cleanup"
-      }]
-    }]
-  }
-}
 ```
 
 ### Use the Topics

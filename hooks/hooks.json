@@ -1,0 +1,25 @@
+{
+  "description": "Topic generation hooks for Claude Code sessions",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | ${CLAUDE_PLUGIN_ROOT}/scripts/topic-generator"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat | ${CLAUDE_PLUGIN_ROOT}/scripts/session-cleanup"
+          }
+        ]
+      }
+    ]
+  }
+}
