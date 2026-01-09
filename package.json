@@ -20,8 +20,8 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.0.0",
     "@semantic-release/git": "^10.0.1",
-    "conventional-changelog-conventionalcommits": "^8.0.0",
-    "semantic-release": "^24.2.0"
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "semantic-release": "^25.0.2"
   },
   "scripts": {
     "release": "semantic-release"
