@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.5.4...v1.6.0) (2026-01-09)
+
+### Features
+
+* add regenerate-topic command for on-demand topic generation ([#28](https://github.com/dreamiurg/claude-session-topics/issues/28)) ([be5fb6c](https://github.com/dreamiurg/claude-session-topics/commit/be5fb6c))
+
 ## [1.2.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.1.0...v1.2.0) (2026-01-09)
 
 ### Features
