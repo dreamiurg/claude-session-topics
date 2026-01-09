@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.5...v1.1.0) (2026-01-09)
+
+### Features
+
+* add auto-install hooks for zero-config setup ([c24398a](https://github.com/dreamiurg/claude-session-topics/commit/c24398aa9fec5663670503626264aa9f8625f0df))
+
 ## [1.0.5](https://github.com/dreamiurg/claude-session-topics/compare/v1.0.4...v1.0.5) (2026-01-09)
 
 ### Bug Fixes
