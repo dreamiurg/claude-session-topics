@@ -1,3 +1,14 @@
+## [1.7.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.6.0...v1.7.0) (2026-01-09)
+
+### Features
+
+* increase context depth for better topic accuracy ([#33](https://github.com/dreamiurg/claude-session-topics/issues/33)) ([a9fb75b](https://github.com/dreamiurg/claude-session-topics/commit/a9fb75b))
+
+### Bug Fixes
+
+* auto-discover session ID from recent state files ([#32](https://github.com/dreamiurg/claude-session-topics/issues/32)) ([70e1d3c](https://github.com/dreamiurg/claude-session-topics/commit/70e1d3c))
+* use rough age estimates instead of precise counts ([#34](https://github.com/dreamiurg/claude-session-topics/issues/34)) ([0da01b5](https://github.com/dreamiurg/claude-session-topics/commit/0da01b5))
+
 ## [1.6.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.5.4...v1.6.0) (2026-01-09)
 
 ### Features
