@@ -13,38 +13,87 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "$SCRIPT_DIR/../lib/common.sh"
 
-# Configuration
+# Configuration - all values can be overridden via environment variables
 readonly THRESHOLD=${CLAUDE_TOPIC_THRESHOLD:-10}
-readonly MAX_CHARS=50
-readonly CONTEXT_LINES=20 # Number of recent transcript entries to use
-readonly LOCK_TIMEOUT=60  # Seconds before lock is considered stale
-readonly CLAUDE_MEM_DB="$HOME/.claude-mem/claude-mem.db"
-readonly CLAUDE_MEM_LIMIT=5 # Number of observations to fetch
+readonly MAX_CHARS=${CLAUDE_TOPIC_MAX_CHARS:-50}
+readonly CONTEXT_LINES=${CLAUDE_TOPIC_CONTEXT_LINES:-20}
+readonly LOCK_TIMEOUT=${CLAUDE_TOPIC_LOCK_TIMEOUT:-60}
+readonly CLAUDE_MEM_DB="${CLAUDE_MEM_DB:-$HOME/.claude-mem/claude-mem.db}"
+readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-5}
 
 # Get context from claude-mem observations (returns empty if unavailable)
+# Args: session_id - validated session identifier
+# Returns: formatted observations on stdout, exit 1 if unavailable
 get_claudemem_context() {
-    local sid="$1"
+    local session_id="$1"
 
     # Check if database exists
     [[ ! -f "$CLAUDE_MEM_DB" ]] && return 1
 
-    # Query observations for this session
+    # Check if sqlite3 is available
+    command -v sqlite3 >/dev/null 2>&1 || return 1
+
+    debug_log "Querying claude-mem for session: $session_id"
+
+    # Query observations using parameterized approach
+    # Session ID is pre-validated by validate_session_id() but we escape for defense-in-depth
+    local escaped_sid
+    escaped_sid=$(printf '%s' "$session_id" | sed "s/'/''/g")
+
     local result
     result=$(sqlite3 "$CLAUDE_MEM_DB" "
         SELECT type, title, subtitle
         FROM observations
-        WHERE sdk_session_id = '$sid'
+        WHERE sdk_session_id = '${escaped_sid}'
         ORDER BY created_at_epoch DESC
-        LIMIT $CLAUDE_MEM_LIMIT;
+        LIMIT ${CLAUDE_MEM_LIMIT};
     " 2>/dev/null) || return 1
 
     # Check if we got any results
     [[ -z "$result" ]] && return 1
 
+    debug_log "Found claude-mem observations"
+
     # Format observations as context
     echo "$result" | while IFS='|' read -r type title subtitle; do
         [[ -n "$title" ]] && echo "[$type] $title: $subtitle"
     done
+}
+
+# Build the topic generation prompt
+# Args: context_source ("claude-mem" or "transcript"), context_text
+# Returns: prompt string on stdout
+build_topic_prompt() {
+    local context_source="$1"
+    local context_text="$2"
+    local source_label context_label
+
+    if [[ "$context_source" == "claude-mem" ]]; then
+        source_label="session observations"
+        context_label="Session observations"
+    else
+        source_label="Claude Code session"
+        context_label="Recent conversation"
+    fi
+
+    cat <<EOF
+Based on these ${source_label}, generate a terse topic line.
+
+Format: "<topic>: <activity>" where topic is 2-3 words and activity uses gerund (-ing) form.
+Examples:
+- OAuth debug: fixing schema validation
+- Blog post: adding code snippets
+- tmux config: wiring session display
+- Zoom migration: rebasing PR
+
+Requirements:
+- Max ${MAX_CHARS} characters total
+- Output ONLY the topic line, nothing else
+- NEVER start with "I", "Looking", "Based", "This", or "Theme"
+
+${context_label}:
+${context_text}
+EOF
 }
 
 # Read and validate input
@@ -86,15 +135,22 @@ fi
 # Increment count
 count=$((count + 1))
 
-# Function to write state
+# Write state to JSON file
+# Args: count (int), topic (string), error (string)
+# State file schema:
+#   count: number of messages since last topic generation
+#   topic: generated topic string or empty
+#   error: error message or empty
+#   generated_at: Unix timestamp of last write
 write_state() {
-    local cnt="$1"
-    local top="$2"
-    local err="$3"
+    local count="$1"
+    local topic="$2"
+    local error="$3"
+    debug_log "Writing state: count=$count, topic='$topic', error='$error'"
     jq -n \
-        --argjson count "$cnt" \
-        --arg topic "$top" \
-        --arg error "$err" \
+        --argjson count "$count" \
+        --arg topic "$topic" \
+        --arg error "$error" \
         --argjson ts "$(date +%s)" \
         '{count: $count, topic: $topic, error: $error, generated_at: $ts}' >"$state_file"
 }
@@ -133,53 +189,32 @@ if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
     fi
 
     if [[ -n "$context" ]]; then
+        # Verify claude CLI is available before spawning background process
+        if ! require_claude_cli; then
+            release_lock "$lock_file"
+            error="claude CLI not available"
+            write_state "$count" "$topic" "$error"
+            exit 0
+        fi
+
         # Run topic generation in background
         (
             # Ensure lock is released on exit
             trap 'release_lock "$lock_file"' EXIT
 
-            # Build prompt based on context source
-            if [[ "$context_source" == "claude-mem" ]]; then
-                prompt="Based on these session observations, generate a terse topic line.
+            debug_log "Starting topic generation (source: $context_source)"
 
-Format: \"<topic>: <activity>\" where topic is 2-3 words and activity uses gerund (-ing) form.
-Examples:
-- OAuth debug: fixing schema validation
-- Blog post: adding code snippets
-- tmux config: wiring session display
-- Zoom migration: rebasing PR
-
-Requirements:
-- Max ${MAX_CHARS} characters total
-- Output ONLY the topic line, nothing else
-- NEVER start with \"I\", \"Looking\", \"Based\", \"This\", or \"Theme\"
-
-Session observations:
-${context}"
-            else
-                prompt="Based on this Claude Code session, generate a terse topic line.
-
-Format: \"<topic>: <activity>\" where topic is 2-3 words and activity uses gerund (-ing) form.
-Examples:
-- OAuth debug: fixing schema validation
-- Blog post: adding code snippets
-- tmux config: wiring session display
-- Zoom migration: rebasing PR
-
-Requirements:
-- Max ${MAX_CHARS} characters total
-- Output ONLY the topic line, nothing else
-- NEVER start with \"I\", \"Looking\", \"Based\", \"This\", or \"Theme\"
-
-Recent conversation:
-${context}"
-            fi
+            # Build prompt using shared function (eliminates duplication)
+            prompt=$(build_topic_prompt "$context_source" "$context")
 
             new_topic=$(printf '%s' "$prompt" | claude --model haiku --print --no-session-persistence --tools "" 2>/dev/null | head -1)
 
             # Update state file with new topic (only writer at this point due to lock)
             if [[ -n "$new_topic" ]]; then
+                debug_log "Generated topic: $new_topic"
                 write_state "0" "$new_topic" ""
+            else
+                debug_log "Topic generation returned empty"
             fi
             # Lock released by trap
         ) &
