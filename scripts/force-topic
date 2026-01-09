@@ -10,10 +10,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 
 readonly MAX_CHARS=${CLAUDE_TOPIC_MAX_CHARS:-50}
-readonly CONTEXT_LINES=${CLAUDE_TOPIC_CONTEXT_LINES:-20}
+readonly CONTEXT_LINES=${CLAUDE_TOPIC_CONTEXT_LINES:-100}
 readonly LOCK_TIMEOUT=${CLAUDE_TOPIC_LOCK_TIMEOUT:-60}
 readonly CLAUDE_MEM_DB="${CLAUDE_MEM_DB:-$HOME/.claude-mem/claude-mem.db}"
-readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-5}
+readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-15}
 
 # Get session ID from argument, environment, or most recent state file
 session_id="${1:-${CLAUDE_SESSION_ID:-}}"
@@ -88,14 +88,19 @@ build_topic_prompt() {
     cat <<EOF
 Based on these ${source_label}, generate a terse topic line.
 
-Format: "<topic>: <activity>" where topic is 2-3 words and activity uses gerund (-ing) form.
+Format: "<topic>: <activity>" where:
+- Topic captures the overall theme (2-4 words)
+- Activity is a SHORT gerund phrase (2-3 words max, e.g., "fixing tests", "adding auth")
+
 Examples:
-- OAuth debug: fixing schema validation
-- Blog post: adding code snippets
-- tmux config: wiring session display
+- OAuth debug: fixing validation
+- Blog post: adding snippets
+- tmux config: wiring display
+- Session topics plugin: updating README
 
 Requirements:
 - Max ${MAX_CHARS} characters total
+- Keep activity part SHORT (2-3 words)
 - Output ONLY the topic line, nothing else
 - NEVER start with "I", "Looking", "Based", "This", or "Theme"
 
@@ -125,7 +130,7 @@ else
                    if .type == "user" then "User: " + (.message.content // .content // "" | tostring | .[0:200])
                    elif .type == "assistant" then "Claude: " + (.message.content // .content // "" | tostring | .[0:200])
                    else empty end' 2>/dev/null |
-            head -c 2000)
+            head -c 5000)
         context_source="transcript"
     fi
 fi
