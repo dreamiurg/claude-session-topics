@@ -12,7 +12,11 @@
       "bump-patch-for-minor-pre-major": true,
       "extra-files": [
         ".claude-plugin/plugin.json",
-        ".claude-plugin/marketplace.json"
+        {
+          "type": "json",
+          "path": ".claude-plugin/marketplace.json",
+          "jsonpath": "$.plugins[0].version"
+        }
       ]
     }
   }
