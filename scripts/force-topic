@@ -15,11 +15,21 @@ readonly LOCK_TIMEOUT=${CLAUDE_TOPIC_LOCK_TIMEOUT:-60}
 readonly CLAUDE_MEM_DB="${CLAUDE_MEM_DB:-$HOME/.claude-mem/claude-mem.db}"
 readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-5}
 
-# Get session ID from argument or environment
+# Get session ID from argument, environment, or most recent state file
 session_id="${1:-${CLAUDE_SESSION_ID:-}}"
 
 if [[ -z "$session_id" ]]; then
-    echo "Error: No session ID provided. Pass as argument or set CLAUDE_SESSION_ID" >&2
+    # Find most recently modified state file
+    latest_state=$(ls -t "${TMPDIR:-/tmp}"/claude-topic-*.json 2>/dev/null | head -1)
+    if [[ -n "$latest_state" ]]; then
+        # Extract session ID from filename: claude-topic-<session_id>.json
+        session_id=$(basename "$latest_state" .json | sed 's/^claude-topic-//')
+        debug_log "Using session from most recent state file: $session_id"
+    fi
+fi
+
+if [[ -z "$session_id" ]]; then
+    echo "Error: No session ID found. Pass as argument or set CLAUDE_SESSION_ID" >&2
     exit 1
 fi
 
