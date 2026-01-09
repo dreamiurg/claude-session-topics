@@ -13,7 +13,7 @@ AI-generated topic summaries for your Claude Code sessions. See what each sessio
 /plugin marketplace add dreamiurg/claude-session-topics
 /plugin install claude-session-topics@dreamiurg
 
-# Then configure your status line
+# Restart Claude Code, then configure your status line
 /claude-session-topics:setup-statusline
 ```
 
