@@ -22,8 +22,14 @@ fi
 
 state_file=$(claude_state_file "$session_id")
 
-# Check if state file exists
-[[ ! -f "$state_file" ]] && exit 0
+# Default placeholder for new sessions
+readonly DEFAULT_TOPIC="New session: gathering context"
+
+# If no state file yet, show placeholder
+if [[ ! -f "$state_file" ]]; then
+    printf '%s' "$DEFAULT_TOPIC"
+    exit 0
+fi
 
 # Read state using individual jq calls to avoid TSV parsing issues
 topic=$(jq -r '.topic // ""' "$state_file" 2>/dev/null) || topic=""
@@ -50,4 +56,7 @@ if [[ -n "$topic" && "$topic" != "null" ]]; then
     fi
 elif [[ -n "$error" && "$error" != "null" ]]; then
     printf '%s' "$error"
+else
+    # State file exists but no topic yet
+    printf '%s' "$DEFAULT_TOPIC"
 fi
