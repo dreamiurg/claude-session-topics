@@ -20,6 +20,7 @@ readonly CONTEXT_LINES=${CLAUDE_TOPIC_CONTEXT_LINES:-100}
 readonly LOCK_TIMEOUT=${CLAUDE_TOPIC_LOCK_TIMEOUT:-60}
 readonly CLAUDE_MEM_DB="${CLAUDE_MEM_DB:-$HOME/.claude-mem/claude-mem.db}"
 readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-15}
+readonly CLAUDE_TIMEOUT=${CLAUDE_TOPIC_CLAUDE_TIMEOUT:-30}
 
 # Get context from claude-mem observations (returns empty if unavailable)
 # Args: session_id - validated session identifier
@@ -201,7 +202,8 @@ if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
             exit 0
         fi
 
-        # Run topic generation in background
+        # Run topic generation in background, fully detached to prevent orphan processes
+        # Close inherited file descriptors and use timeout to prevent hangs
         (
             # Ensure lock is released on exit
             trap 'release_lock "$lock_file"' EXIT
@@ -211,7 +213,20 @@ if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
             # Build prompt using shared function (eliminates duplication)
             prompt=$(build_topic_prompt "$context_source" "$context")
 
-            new_topic=$(printf '%s' "$prompt" | claude --model haiku --print --no-session-persistence --tools "" 2>/dev/null | head -1)
+            # Use timeout to prevent indefinite hangs (macOS uses gtimeout from coreutils)
+            timeout_cmd=""
+            if command -v timeout >/dev/null 2>&1; then
+                timeout_cmd="timeout ${CLAUDE_TIMEOUT}"
+            elif command -v gtimeout >/dev/null 2>&1; then
+                timeout_cmd="gtimeout ${CLAUDE_TIMEOUT}"
+            fi
+
+            if [[ -n "$timeout_cmd" ]]; then
+                new_topic=$(printf '%s' "$prompt" | $timeout_cmd claude --model haiku --print --no-session-persistence --tools "" 2>/dev/null | head -1)
+            else
+                # Fallback without timeout - rely on claude's own timeout behavior
+                new_topic=$(printf '%s' "$prompt" | claude --model haiku --print --no-session-persistence --tools "" 2>/dev/null | head -1)
+            fi
 
             # Update state file with new topic (only writer at this point due to lock)
             if [[ -n "$new_topic" ]]; then
@@ -221,7 +236,8 @@ if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
                 debug_log "Topic generation returned empty"
             fi
             # Lock released by trap
-        ) &
+        ) </dev/null >/dev/null 2>&1 &
+        disown 2>/dev/null || true
 
         # Main process: write current state and exit immediately (don't race with background)
         # The background process will overwrite when it completes
