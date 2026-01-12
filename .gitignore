@@ -28,3 +28,11 @@ coverage/
 # Build artifacts
 dist/
 build/
+
+# Planning documents
+docs/plans/
+
+# TypeScript
+node_modules/
+dist/
+*.tsbuildinfo

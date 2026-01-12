@@ -1,19 +1,21 @@
 {
   "name": "claude-session-topics",
-  "version": "1.7.2",
-  "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:dreamiurg/claude-session-topics.git"
+  "version": "1.8.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "tsc --noEmit"
   },
-  "keywords": [
-    "claude-code",
-    "session-management",
-    "topic-generation",
-    "productivity",
-    "ai-assistant"
-  ],
-  "author": "dreamiurg",
-  "license": "MIT"
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "zx": "^8.2.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
 }
