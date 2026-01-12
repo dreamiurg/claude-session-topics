@@ -1,9 +1,10 @@
 // src/state.test.ts
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { readState, writeState, getStatePath } from './state.js';
-import { mkdtempSync, rmSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { readState, writeState } from './state.js';
 
 describe('State Management', () => {
   let tempDir: string;

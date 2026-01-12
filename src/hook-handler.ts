@@ -1,16 +1,13 @@
-import { validateSessionId } from './validation.js';
-import { readState, writeState } from './state.js';
-import { acquireLock, releaseLock } from './lock.js';
 import { getClaudeMemContext } from './claude-mem.js';
-import { parseTranscript, findTranscriptPath } from './transcript.js';
+import { acquireLock, releaseLock } from './lock.js';
 import { shouldGenerate } from './schedule.js';
+import { readState, writeState } from './state.js';
 import { generateTopic } from './topic-generator.js';
+import { findTranscriptPath, parseTranscript } from './transcript.js';
 import type { HookInput, SessionState } from './types.js';
+import { validateSessionId } from './validation.js';
 
-export async function handleStopHook(
-  input: HookInput,
-  tempDir?: string
-): Promise<void> {
+export async function handleStopHook(input: HookInput, tempDir?: string): Promise<void> {
   const { session_id, cwd, transcript_path, stop_hook_active } = input;
 
   // Skip if already in stop hook (prevent infinite loops)
@@ -82,7 +79,6 @@ export async function handleStopHook(
     state.error = '';
     state.generated_at = Date.now();
     writeState(session_id, state, tempDir);
-
   } catch (error) {
     releaseLock(session_id, tempDir);
     state.error = error instanceof Error ? error.message : 'unknown error';

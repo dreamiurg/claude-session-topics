@@ -47,9 +47,20 @@ export async function generateTopic(
       }
     }
 
-    const fullCommand = command === 'claude'
-      ? ['claude', '--model', 'haiku', '--print', '--no-session-persistence', '--tools', '']
-      : [command, String(timeoutSec), 'claude', '--model', 'haiku', '--print', '--no-session-persistence', '--tools', ''];
+    const fullCommand =
+      command === 'claude'
+        ? ['claude', '--model', 'haiku', '--print', '--no-session-persistence', '--tools', '']
+        : [
+            command,
+            String(timeoutSec),
+            'claude',
+            '--model',
+            'haiku',
+            '--print',
+            '--no-session-persistence',
+            '--tools',
+            ''
+          ];
 
     const result = await $`echo ${prompt} | ${fullCommand}`;
     const topic = result.stdout.trim().split('\n')[0];

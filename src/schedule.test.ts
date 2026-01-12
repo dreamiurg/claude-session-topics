@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { shouldGenerate, nextGenerationAt } from './schedule.js';
+import { describe, expect, it } from 'vitest';
+import { nextGenerationAt, shouldGenerate } from './schedule.js';
 
 describe('Fibonacci Schedule', () => {
   describe('shouldGenerate', () => {

@@ -1,7 +1,7 @@
 // src/state.ts
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { SessionState } from './types.js';
 
 const STATE_PREFIX = 'claude-topic-';

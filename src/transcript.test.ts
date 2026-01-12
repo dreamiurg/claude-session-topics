@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { parseTranscript, findTranscriptPath } from './transcript.js';
-import { join } from 'path';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { parseTranscript } from './transcript.js';
 
 describe('Transcript Parsing', () => {
   it('should parse transcript messages', async () => {

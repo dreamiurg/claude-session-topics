@@ -1,5 +1,5 @@
 // src/claude-mem.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getClaudeMemContext } from './claude-mem.js';
 
 describe('Claude-Mem Integration', () => {

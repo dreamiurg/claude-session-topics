@@ -1,7 +1,7 @@
 // src/lock.ts
-import { mkdirSync, rmdirSync, statSync, existsSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { existsSync, mkdirSync, rmdirSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const LOCK_PREFIX = 'claude-topic-';
 const LOCK_SUFFIX = '.lock';

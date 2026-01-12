@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const version = process.argv[2];
 if (!version) {
@@ -22,21 +22,21 @@ console.log(`Updating version to ${version}`);
 const pluginJsonPath = path.join(__dirname, '..', '.claude-plugin', 'plugin.json');
 const pluginJson = JSON.parse(fs.readFileSync(pluginJsonPath, 'utf8'));
 pluginJson.version = version;
-fs.writeFileSync(pluginJsonPath, JSON.stringify(pluginJson, null, 2) + '\n');
+fs.writeFileSync(pluginJsonPath, `${JSON.stringify(pluginJson, null, 2)}\n`);
 console.log(`✓ Updated ${pluginJsonPath}`);
 
 // Update marketplace.json
 const marketplaceJsonPath = path.join(__dirname, '..', '.claude-plugin', 'marketplace.json');
 const marketplaceJson = JSON.parse(fs.readFileSync(marketplaceJsonPath, 'utf8'));
 marketplaceJson.plugins[0].version = version;
-fs.writeFileSync(marketplaceJsonPath, JSON.stringify(marketplaceJson, null, 2) + '\n');
+fs.writeFileSync(marketplaceJsonPath, `${JSON.stringify(marketplaceJson, null, 2)}\n`);
 console.log(`✓ Updated ${marketplaceJsonPath}`);
 
 // Update package.json
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 packageJson.version = version;
-fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
 console.log(`✓ Updated ${packageJsonPath}`);
 
 console.log(`\nAll versions updated to ${version}`);

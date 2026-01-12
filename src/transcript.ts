@@ -1,7 +1,7 @@
-import { readFileSync, existsSync, statSync } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
-import type { TranscriptMessage, MessageContent } from './types.js';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import type { MessageContent, TranscriptMessage } from './types.js';
 
 export function findTranscriptPath(sessionId: string, cwd: string): string | null {
   const claudeProjects = join(homedir(), '.claude', 'projects');
@@ -19,10 +19,7 @@ export function findTranscriptPath(sessionId: string, cwd: string): string | nul
   return null;
 }
 
-async function waitForTranscriptContent(
-  path: string,
-  maxWaitMs = 2000
-): Promise<boolean> {
+async function waitForTranscriptContent(path: string, maxWaitMs = 2000): Promise<boolean> {
   const startTime = Date.now();
   let prevSize = 0;
 
@@ -38,7 +35,7 @@ async function waitForTranscriptContent(
       prevSize = currentSize;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   return prevSize > 0;
@@ -51,18 +48,15 @@ function extractTextFromContent(content: string | MessageContent[]): string {
 
   if (Array.isArray(content)) {
     return content
-      .filter(block => block.type === 'text')
-      .map(block => block.text || '')
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text || '')
       .join(' ');
   }
 
   return '';
 }
 
-export async function parseTranscript(
-  path: string,
-  contextLines = 50
-): Promise<string | null> {
+export async function parseTranscript(path: string, contextLines = 50): Promise<string | null> {
   if (!existsSync(path)) {
     return null;
   }
@@ -95,15 +89,11 @@ export async function parseTranscript(
             messages.push(`Claude: ${text.slice(0, 200)}`);
           }
         }
-      } catch {
-        // Skip invalid JSON lines
-        continue;
-      }
+      } catch {}
     }
 
     const context = messages.join('\n').slice(0, 5000);
     return context.length > 0 ? context : null;
-
   } catch {
     return null;
   }

@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { formatTopicDisplay } from './display';
 import { handleStopHook } from './hook-handler';
 import { readState } from './state';
-import { formatTopicDisplay } from './display';
 import type { HookInput } from './types';
 
 describe('Integration Tests', () => {

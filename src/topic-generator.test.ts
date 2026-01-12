@@ -1,6 +1,6 @@
 // src/topic-generator.test.ts
-import { describe, it, expect, vi } from 'vitest';
-import { generateTopic, buildPrompt } from './topic-generator.js';
+import { describe, expect, it } from 'vitest';
+import { buildPrompt } from './topic-generator.js';
 
 describe('Topic Generation', () => {
   describe('buildPrompt', () => {

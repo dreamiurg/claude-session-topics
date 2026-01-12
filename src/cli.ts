@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { handleStopHook } from './hook-handler.js';
 import type { HookInput } from './types.js';
 
@@ -14,7 +14,6 @@ async function main() {
       await handleStopHook(hookInput);
     }
     // SessionEnd handled by cleanup script (can add later)
-
   } catch (error) {
     // Silent failure - hooks should not interrupt Claude
     if (process.env.CLAUDE_TOPIC_DEBUG) {

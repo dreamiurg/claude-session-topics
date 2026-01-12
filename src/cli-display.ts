@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // src/cli-display.ts
-import { readFileSync } from 'fs';
-import { readState } from './state.js';
+import { readFileSync } from 'node:fs';
 import { formatTopicDisplay } from './display.js';
+import { readState } from './state.js';
 import { validateSessionId } from './validation.js';
 
 interface StatusLineInput {
@@ -39,7 +39,6 @@ function main() {
     const state = readState(sessionId);
     const display = formatTopicDisplay(state);
     console.log(display);
-
   } catch {
     // Silent failure
   }

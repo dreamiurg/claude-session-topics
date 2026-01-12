@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // src/cli-force-topic.ts
-import { readFileSync } from 'fs';
-import { readState, writeState } from './state.js';
-import { validateSessionId } from './validation.js';
+import { readFileSync } from 'node:fs';
 import { getClaudeMemContext } from './claude-mem.js';
-import { findTranscriptPath, parseTranscript } from './transcript.js';
+import { writeState } from './state.js';
 import { generateTopic } from './topic-generator.js';
+import { findTranscriptPath, parseTranscript } from './transcript.js';
+import { validateSessionId } from './validation.js';
 
 async function main() {
   try {
@@ -53,7 +53,6 @@ async function main() {
     writeState(session_id, state);
 
     console.log(`Topic: ${topic}`);
-
   } catch (error) {
     console.error('Error:', error instanceof Error ? error.message : 'unknown');
     process.exit(1);

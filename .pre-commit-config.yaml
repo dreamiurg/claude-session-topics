@@ -62,6 +62,31 @@ repos:
         types: [markdown]
         pass_filenames: true
 
+      # TypeScript/JavaScript checks
+      - id: typescript-typecheck
+        name: TypeScript strict type checking
+        description: Run TypeScript compiler with strict mode
+        entry: npm run typecheck
+        language: system
+        types: [ts, tsx]
+        pass_filenames: false
+
+      - id: biome-check
+        name: Biome format and lint
+        description: Format and lint TypeScript/JavaScript with Biome
+        entry: npm run check:ci
+        language: system
+        types_or: [ts, javascript, json]
+        pass_filenames: false
+
+      - id: vitest
+        name: Run TypeScript tests
+        description: Run vitest test suite
+        entry: npm run test:ci
+        language: system
+        types: [ts, tsx]
+        pass_filenames: false
+
 # Global settings
 default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
