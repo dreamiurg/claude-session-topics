@@ -37,11 +37,11 @@ export async function generateTopic(
     let command = 'claude';
     try {
       await $`which timeout`;
-      command = `timeout ${timeoutSec}`;
+      command = 'timeout';
     } catch {
       try {
         await $`which gtimeout`;
-        command = `gtimeout ${timeoutSec}`;
+        command = 'gtimeout';
       } catch {
         // No timeout available
       }

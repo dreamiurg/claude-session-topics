@@ -1,11 +1,16 @@
+import { spawn } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getClaudeMemContext } from './claude-mem.js';
 import { acquireLock, releaseLock } from './lock.js';
 import { shouldGenerate } from './schedule.js';
 import { readState, writeState } from './state.js';
-import { generateTopic } from './topic-generator.js';
 import { findTranscriptPath, parseTranscript } from './transcript.js';
-import type { HookInput, SessionState } from './types.js';
+import type { HookInput } from './types.js';
 import { validateSessionId } from './validation.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export async function handleStopHook(input: HookInput, tempDir?: string): Promise<void> {
   const { session_id, cwd, transcript_path, stop_hook_active } = input;
@@ -72,8 +77,17 @@ export async function handleStopHook(input: HookInput, tempDir?: string): Promis
       return;
     }
 
-    // Generate topic in background (don't await)
-    generateTopicBackground(session_id, context, source, tempDir);
+    // Spawn detached background process to generate topic
+    const scriptPath = join(__dirname, 'background-generator.js');
+    const args = [session_id, context, source, tempDir || ''];
+
+    const child = spawn('node', [scriptPath, ...args], {
+      detached: true,
+      stdio: 'ignore',
+      env: process.env
+    });
+
+    child.unref(); // Allow parent to exit independently
 
     // Write current state (background will update when done)
     state.error = '';
@@ -84,30 +98,5 @@ export async function handleStopHook(input: HookInput, tempDir?: string): Promis
     state.error = error instanceof Error ? error.message : 'unknown error';
     state.generated_at = Date.now();
     writeState(session_id, state, tempDir);
-  }
-}
-
-async function generateTopicBackground(
-  sessionId: string,
-  context: string,
-  source: 'claude-mem' | 'transcript',
-  tempDir?: string
-): Promise<void> {
-  try {
-    const topic = await generateTopic(context, source);
-
-    if (topic) {
-      // Read current state to preserve count
-      const currentState = readState(sessionId, tempDir);
-      const newState: SessionState = {
-        count: currentState?.count || 0,
-        topic,
-        error: '',
-        generated_at: Date.now()
-      };
-      writeState(sessionId, newState, tempDir);
-    }
-  } finally {
-    releaseLock(sessionId, tempDir);
   }
 }
