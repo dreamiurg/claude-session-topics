@@ -10,6 +10,26 @@
           }
         ]
       }
+    ],
+    "PostWrite": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd ${CLAUDE_PLUGIN_ROOT} && npx biome format --write \"${FILE_PATH}\""
+          }
+        ]
+      }
+    ],
+    "PostEdit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd ${CLAUDE_PLUGIN_ROOT} && npx biome format --write \"${FILE_PATH}\""
+          }
+        ]
+      }
     ]
   }
 }
