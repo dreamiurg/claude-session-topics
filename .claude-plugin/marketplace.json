@@ -8,11 +8,11 @@
     {
       "name": "claude-session-topics",
       "source": {
-        "source": "url",
-        "url": "https://github.com/dreamiurg/claude-session-topics.git"
+        "source": "local",
+        "path": "/Users/dreamiurg/src/dreamiurg/claude-session-topics"
       },
       "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
-      "version": "1.7.2"
+      "version": "2.0.0"
     }
   ]
 }
