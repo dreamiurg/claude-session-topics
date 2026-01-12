@@ -35,18 +35,34 @@ fi
 
 state_file=$(claude_state_file "$session_id")
 
-# Default placeholder for new sessions
-readonly DEFAULT_TOPIC="New session: gathering context"
+# Configuration - matches topic-generator
+readonly REGEN_INTERVAL=${CLAUDE_TOPIC_REGEN_INTERVAL:-10}
 
-# If no state file yet, show placeholder
+# Calculate next generation point (Fibonacci: 1,2,3,5,8 then every REGEN_INTERVAL)
+next_generation_at() {
+    local cnt="$1"
+    # Fibonacci thresholds
+    [[ $cnt -lt 1 ]] && echo 1 && return
+    [[ $cnt -lt 2 ]] && echo 2 && return
+    [[ $cnt -lt 3 ]] && echo 3 && return
+    [[ $cnt -lt 5 ]] && echo 5 && return
+    [[ $cnt -lt 8 ]] && echo 8 && return
+    # After Fibonacci, next is at intervals of REGEN_INTERVAL from 8
+    local since_fib=$((cnt - 8))
+    local next_interval=$(( (since_fib / REGEN_INTERVAL + 1) * REGEN_INTERVAL ))
+    echo $((8 + next_interval))
+}
+
+# If no state file yet, show helpful message
 if [[ ! -f "$state_file" ]]; then
-    printf '%s' "$DEFAULT_TOPIC"
+    printf 'Topic: after 1 message'
     exit 0
 fi
 
 # Read state using individual jq calls to avoid TSV parsing issues
 topic=$(jq -r '.topic // ""' "$state_file" 2>/dev/null) || topic=""
 error=$(jq -r '.error // ""' "$state_file" 2>/dev/null) || error=""
+count=$(jq -r '.count // 0' "$state_file" 2>/dev/null) || count=0
 generated_at=$(jq -r '.generated_at // 0' "$state_file" 2>/dev/null) || generated_at=0
 
 # If we have a topic, calculate age and display
@@ -74,9 +90,16 @@ if [[ -n "$topic" && "$topic" != "null" ]]; then
     else
         printf '%s' "$topic"
     fi
-elif [[ -n "$error" && "$error" != "null" ]]; then
+elif [[ -n "$error" && "$error" != "null" && "$error" != "waiting for conversation" ]]; then
+    # Show actual errors, but not the "waiting" status
     printf '%s' "$error"
 else
-    # State file exists but no topic yet
-    printf '%s' "$DEFAULT_TOPIC"
+    # State file exists but no topic yet - show progress
+    next_at=$(next_generation_at "$count")
+    remaining=$((next_at - count))
+    if [[ $remaining -le 0 ]]; then
+        printf 'Generating topic...'
+    else
+        printf 'Topic: in %d messages' "$remaining"
+    fi
 fi

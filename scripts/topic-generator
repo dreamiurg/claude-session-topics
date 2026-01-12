@@ -14,7 +14,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 
 # Configuration - all values can be overridden via environment variables
-readonly THRESHOLD=${CLAUDE_TOPIC_THRESHOLD:-10}
+# Fibonacci-style regeneration: 1,2,3,5,8 then every REGEN_INTERVAL
+readonly REGEN_INTERVAL=${CLAUDE_TOPIC_REGEN_INTERVAL:-10}
 readonly MAX_CHARS=${CLAUDE_TOPIC_MAX_CHARS:-50}
 readonly CONTEXT_LINES=${CLAUDE_TOPIC_CONTEXT_LINES:-100}
 readonly LOCK_TIMEOUT=${CLAUDE_TOPIC_LOCK_TIMEOUT:-60}
@@ -122,6 +123,40 @@ ${context_text}
 EOF
 }
 
+# Find transcript path for a session
+# Args: session_id, cwd (optional)
+# Returns: transcript path on stdout, exit 1 if not found
+find_transcript_path() {
+    local session_id="$1"
+    local cwd="${2:-$PWD}"
+    local claude_projects="$HOME/.claude/projects"
+
+    # Convert cwd to Claude's project directory format
+    # /Users/foo/bar -> -Users-foo-bar
+    local project_dir
+    project_dir=$(echo "$cwd" | sed 's|^/||; s|/|-|g; s|^|-|')
+
+    local transcript_path="$claude_projects/$project_dir/$session_id.jsonl"
+
+    if [[ -f "$transcript_path" ]]; then
+        debug_log "Found transcript at: $transcript_path"
+        echo "$transcript_path"
+        return 0
+    fi
+
+    # Try finding by session_id pattern in project dirs
+    local found
+    found=$(find "$claude_projects" -name "${session_id}.jsonl" -type f 2>/dev/null | head -1)
+    if [[ -n "$found" && -f "$found" ]]; then
+        debug_log "Found transcript via search: $found"
+        echo "$found"
+        return 0
+    fi
+
+    debug_log "No transcript found for session: $session_id"
+    return 1
+}
+
 # Read and validate input
 input=$(cat)
 if ! jq empty <<<"$input" 2>/dev/null; then
@@ -182,7 +217,29 @@ write_state() {
 }
 
 # Check if we should generate a new topic
-if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
+# Fibonacci schedule: generate at 1,2,3,5,8 then every REGEN_INTERVAL after 8
+should_generate() {
+    local cnt="$1"
+    local current_topic="$2"
+
+    # Always generate if no topic yet
+    [[ -z "$current_topic" ]] && return 0
+
+    # Check Fibonacci thresholds (1,2,3,5,8)
+    case $cnt in
+        1|2|3|5|8) return 0 ;;
+    esac
+
+    # After Fibonacci phase (>8), generate every REGEN_INTERVAL messages
+    if [[ $cnt -gt 8 ]]; then
+        local since_fib=$((cnt - 8))
+        [[ $((since_fib % REGEN_INTERVAL)) -eq 0 ]] && return 0
+    fi
+
+    return 1
+}
+
+if should_generate "$count" "$topic"; then
     # Try to acquire lock atomically
     if ! acquire_lock "$lock_file" "$LOCK_TIMEOUT"; then
         # Lock held by another process, just update count and exit
@@ -200,6 +257,12 @@ if [[ $count -ge $THRESHOLD || -z "$topic" ]]; then
         transcript_path=$(jq -r '.transcript_path // empty' <<<"$input")
         if [[ -n "$transcript_path" ]]; then
             transcript_path=$(validate_transcript_path "$transcript_path") || transcript_path=""
+        fi
+
+        # If no transcript_path provided, try to find it
+        if [[ -z "$transcript_path" ]]; then
+            cwd=$(jq -r '.cwd // empty' <<<"$input")
+            transcript_path=$(find_transcript_path "$session_id" "$cwd") || transcript_path=""
         fi
 
         if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
