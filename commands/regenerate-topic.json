@@ -1,0 +1,5 @@
+{
+  "name": "regenerate-topic",
+  "description": "Force regenerate the session topic",
+  "command": "cat | node ${CLAUDE_PLUGIN_ROOT}/dist/cli-force-topic.js"
+}
