@@ -23,7 +23,7 @@ readonly CLAUDE_MEM_LIMIT=${CLAUDE_TOPIC_MEM_LIMIT:-15}
 readonly CLAUDE_TIMEOUT=${CLAUDE_TOPIC_CLAUDE_TIMEOUT:-30}
 
 # Get context from claude-mem observations (returns empty if unavailable)
-# Args: session_id - validated session identifier
+# Args: session_id - Claude Code session ID (content_session_id)
 # Returns: formatted observations on stdout, exit 1 if unavailable
 get_claudemem_context() {
     local session_id="$1"
@@ -36,16 +36,37 @@ get_claudemem_context() {
 
     debug_log "Querying claude-mem for session: $session_id"
 
-    # Query observations using parameterized approach
     # Session ID is pre-validated by validate_session_id() but we escape for defense-in-depth
     local escaped_sid
     escaped_sid=$(printf '%s' "$session_id" | sed "s/'/''/g")
 
+    # First, look up the memory_session_id from sdk_sessions using content_session_id
+    local memory_sid
+    memory_sid=$(sqlite3 "$CLAUDE_MEM_DB" "
+        SELECT memory_session_id
+        FROM sdk_sessions
+        WHERE content_session_id = '${escaped_sid}'
+        LIMIT 1;
+    " 2>/dev/null) || return 1
+
+    # If no memory_session_id found, return failure
+    [[ -z "$memory_sid" ]] && {
+        debug_log "No memory_session_id found for content_session_id: $session_id"
+        return 1
+    }
+
+    debug_log "Found memory_session_id: $memory_sid"
+
+    # Escape memory_sid for query
+    local escaped_msid
+    escaped_msid=$(printf '%s' "$memory_sid" | sed "s/'/''/g")
+
+    # Query observations using the memory_session_id
     local result
     result=$(sqlite3 "$CLAUDE_MEM_DB" "
         SELECT type, title, subtitle
         FROM observations
-        WHERE sdk_session_id = '${escaped_sid}'
+        WHERE memory_session_id = '${escaped_msid}'
         ORDER BY created_at_epoch DESC
         LIMIT ${CLAUDE_MEM_LIMIT};
     " 2>/dev/null) || return 1
