@@ -1,6 +1,6 @@
 // src/claude-mem.test.ts
 import { describe, it, expect, vi } from 'vitest';
-import { getClaudeMemContext } from './claude-mem';
+import { getClaudeMemContext } from './claude-mem.js';
 
 describe('Claude-Mem Integration', () => {
   it('should return null when no memory_session_id found', async () => {

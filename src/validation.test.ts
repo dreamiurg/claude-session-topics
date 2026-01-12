@@ -1,6 +1,6 @@
 // src/validation.test.ts
 import { describe, it, expect } from 'vitest';
-import { validateSessionId } from './validation';
+import { validateSessionId } from './validation.js';
 
 describe('Validation', () => {
   describe('validateSessionId', () => {

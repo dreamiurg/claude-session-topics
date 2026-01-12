@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseTranscript, findTranscriptPath } from './transcript';
+import { parseTranscript, findTranscriptPath } from './transcript.js';
 import { join } from 'path';
 
 describe('Transcript Parsing', () => {

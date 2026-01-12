@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import type { SessionState } from './types';
+import type { SessionState } from './types.js';
 
 const STATE_PREFIX = 'claude-topic-';
 

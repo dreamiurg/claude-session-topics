@@ -1,6 +1,6 @@
 // src/state.test.ts
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { readState, writeState, getStatePath } from './state';
+import { readState, writeState, getStatePath } from './state.js';
 import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';

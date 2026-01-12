@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import { homedir } from 'os';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import type { ClaudeMemObservation } from './types';
+import type { ClaudeMemObservation } from './types.js';
 
 const CLAUDE_MEM_DB = join(homedir(), '.claude', 'plugins', 'cache', 'claude-mem', 'claude-mem.db');
 

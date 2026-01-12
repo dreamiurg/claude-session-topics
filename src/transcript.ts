@@ -1,7 +1,7 @@
 import { readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import type { TranscriptMessage, MessageContent } from './types';
+import type { TranscriptMessage, MessageContent } from './types.js';
 
 export function findTranscriptPath(sessionId: string, cwd: string): string | null {
   const claudeProjects = join(homedir(), '.claude', 'projects');

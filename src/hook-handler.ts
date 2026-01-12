@@ -1,11 +1,11 @@
-import { validateSessionId } from './validation';
-import { readState, writeState } from './state';
-import { acquireLock, releaseLock } from './lock';
-import { getClaudeMemContext } from './claude-mem';
-import { parseTranscript, findTranscriptPath } from './transcript';
-import { shouldGenerate } from './schedule';
-import { generateTopic } from './topic-generator';
-import type { HookInput, SessionState } from './types';
+import { validateSessionId } from './validation.js';
+import { readState, writeState } from './state.js';
+import { acquireLock, releaseLock } from './lock.js';
+import { getClaudeMemContext } from './claude-mem.js';
+import { parseTranscript, findTranscriptPath } from './transcript.js';
+import { shouldGenerate } from './schedule.js';
+import { generateTopic } from './topic-generator.js';
+import type { HookInput, SessionState } from './types.js';
 
 export async function handleStopHook(
   input: HookInput,

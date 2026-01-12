@@ -1,6 +1,6 @@
 // src/types.test.ts
 import { describe, it, expect } from 'vitest';
-import type { SessionState } from './types';
+import type { SessionState } from './types.js';
 
 describe('SessionState', () => {
   it('should have required fields', () => {

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // src/cli-force-topic.ts
 import { readFileSync } from 'fs';
-import { readState, writeState } from './state';
-import { validateSessionId } from './validation';
-import { getClaudeMemContext } from './claude-mem';
-import { findTranscriptPath, parseTranscript } from './transcript';
-import { generateTopic } from './topic-generator';
+import { readState, writeState } from './state.js';
+import { validateSessionId } from './validation.js';
+import { getClaudeMemContext } from './claude-mem.js';
+import { findTranscriptPath, parseTranscript } from './transcript.js';
+import { generateTopic } from './topic-generator.js';
 
 async function main() {
   try {

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { handleStopHook } from './hook-handler';
+import { handleStopHook } from './hook-handler.js';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import type { HookInput } from './types';
+import type { HookInput } from './types.js';
 
 describe('Hook Handler', () => {
   let tempDir: string;
@@ -27,7 +27,7 @@ describe('Hook Handler', () => {
 
     await handleStopHook(input, tempDir);
 
-    const { readState } = await import('./state');
+    const { readState } = await import('./state.js');
     const state = readState('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
 
     expect(state?.count).toBe(1);
@@ -44,7 +44,7 @@ describe('Hook Handler', () => {
 
     await handleStopHook(input, tempDir);
 
-    const { readState } = await import('./state');
+    const { readState } = await import('./state.js');
     const state = readState('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
 
     expect(state).toBeNull();
@@ -61,7 +61,7 @@ describe('Hook Handler', () => {
 
     await handleStopHook(input, tempDir);
 
-    const { readState } = await import('./state');
+    const { readState } = await import('./state.js');
     const state = readState('invalid', tempDir);
 
     expect(state).toBeNull();
@@ -76,7 +76,7 @@ describe('Hook Handler', () => {
       permission_mode: 'default'
     };
 
-    const { readState } = await import('./state');
+    const { readState } = await import('./state.js');
 
     // First call
     await handleStopHook(input, tempDir);
@@ -103,8 +103,8 @@ describe('Hook Handler', () => {
       permission_mode: 'default'
     };
 
-    const { acquireLock } = await import('./lock');
-    const { readState } = await import('./state');
+    const { acquireLock } = await import('./lock.js');
+    const { readState } = await import('./state.js');
 
     // Acquire lock manually
     acquireLock('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
