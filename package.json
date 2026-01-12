@@ -17,11 +17,16 @@
   ],
   "author": "dreamiurg",
   "license": "MIT",
+  "bin": {
+    "claude-topic-generator": "./dist/cli.js",
+    "claude-topic-force": "./dist/cli-force-topic.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
