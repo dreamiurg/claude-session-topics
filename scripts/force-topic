@@ -55,11 +55,28 @@ get_claudemem_context() {
     local escaped_sid
     escaped_sid=$(printf '%s' "$sid" | sed "s/'/''/g")
 
+    # First, look up the memory_session_id from sdk_sessions using content_session_id
+    local memory_sid
+    memory_sid=$(sqlite3 "$CLAUDE_MEM_DB" "
+        SELECT memory_session_id
+        FROM sdk_sessions
+        WHERE content_session_id = '${escaped_sid}'
+        LIMIT 1;
+    " 2>/dev/null) || return 1
+
+    # If no memory_session_id found, return failure
+    [[ -z "$memory_sid" ]] && return 1
+
+    # Escape memory_sid for query
+    local escaped_msid
+    escaped_msid=$(printf '%s' "$memory_sid" | sed "s/'/''/g")
+
+    # Query observations using the memory_session_id
     local result
     result=$(sqlite3 "$CLAUDE_MEM_DB" "
         SELECT type, title, subtitle
         FROM observations
-        WHERE sdk_session_id = '${escaped_sid}'
+        WHERE memory_session_id = '${escaped_msid}'
         ORDER BY created_at_epoch DESC
         LIMIT ${CLAUDE_MEM_LIMIT};
     " 2>/dev/null) || return 1
