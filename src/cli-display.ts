@@ -14,17 +14,18 @@ function main() {
     // Read from stdin if available (ccstatusline format)
     let sessionId: string | undefined;
 
-    if (!process.stdin.isTTY) {
+    // First check command line argument
+    if (process.argv[2]) {
+      sessionId = process.argv[2];
+    }
+
+    // Fall back to stdin if no argument provided
+    if (!sessionId && process.stdin.isTTY === false) {
       const input = readFileSync(0, 'utf-8');
       if (input.trim()) {
         const parsed = JSON.parse(input) as StatusLineInput;
         sessionId = parsed.session_id;
       }
-    }
-
-    // Or from command line argument
-    if (!sessionId && process.argv[2]) {
-      sessionId = process.argv[2];
     }
 
     if (!sessionId) {
