@@ -34,3 +34,6 @@ docs/plans/
 
 # TypeScript
 *.tsbuildinfo
+
+# Claude-mem context
+.claude-plugin/CLAUDE.md
