@@ -33,6 +33,4 @@ build/
 docs/plans/
 
 # TypeScript
-node_modules/
-dist/
 *.tsbuildinfo
