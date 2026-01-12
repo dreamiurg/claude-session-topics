@@ -1,0 +1,117 @@
+import { validateSessionId } from './validation';
+import { readState, writeState } from './state';
+import { acquireLock, releaseLock } from './lock';
+import { getClaudeMemContext } from './claude-mem';
+import { parseTranscript, findTranscriptPath } from './transcript';
+import { shouldGenerate } from './schedule';
+import { generateTopic } from './topic-generator';
+import type { HookInput, SessionState } from './types';
+
+export async function handleStopHook(
+  input: HookInput,
+  tempDir?: string
+): Promise<void> {
+  const { session_id, cwd, transcript_path, stop_hook_active } = input;
+
+  // Skip if already in stop hook (prevent infinite loops)
+  if (stop_hook_active) {
+    return;
+  }
+
+  // Validate session ID
+  if (!validateSessionId(session_id)) {
+    return;
+  }
+
+  // Read or initialize state
+  let state = readState(session_id, tempDir);
+  if (!state) {
+    state = {
+      count: 0,
+      topic: '',
+      error: '',
+      generated_at: Date.now()
+    };
+  }
+
+  // Increment count
+  state.count++;
+
+  // Check if we should generate
+  if (!shouldGenerate(state.count, state.topic)) {
+    // Just update count
+    state.generated_at = Date.now();
+    writeState(session_id, state, tempDir);
+    return;
+  }
+
+  // Try to acquire lock
+  if (!acquireLock(session_id, tempDir)) {
+    // Another process is generating, just update count
+    state.generated_at = Date.now();
+    writeState(session_id, state, tempDir);
+    return;
+  }
+
+  try {
+    // Try claude-mem first
+    let context = await getClaudeMemContext(session_id);
+    let source: 'claude-mem' | 'transcript' = 'claude-mem';
+
+    // Fallback to transcript
+    if (!context) {
+      const transcriptFilePath = transcript_path || findTranscriptPath(session_id, cwd);
+      if (transcriptFilePath) {
+        context = await parseTranscript(transcriptFilePath);
+        source = 'transcript';
+      }
+    }
+
+    if (!context) {
+      state.error = 'waiting for conversation';
+      state.generated_at = Date.now();
+      writeState(session_id, state, tempDir);
+      releaseLock(session_id, tempDir);
+      return;
+    }
+
+    // Generate topic in background (don't await)
+    generateTopicBackground(session_id, context, source, tempDir);
+
+    // Write current state (background will update when done)
+    state.error = '';
+    state.generated_at = Date.now();
+    writeState(session_id, state, tempDir);
+
+  } catch (error) {
+    releaseLock(session_id, tempDir);
+    state.error = error instanceof Error ? error.message : 'unknown error';
+    state.generated_at = Date.now();
+    writeState(session_id, state, tempDir);
+  }
+}
+
+async function generateTopicBackground(
+  sessionId: string,
+  context: string,
+  source: 'claude-mem' | 'transcript',
+  tempDir?: string
+): Promise<void> {
+  try {
+    const topic = await generateTopic(context, source);
+
+    if (topic) {
+      // Read current state to preserve count
+      const currentState = readState(sessionId, tempDir);
+      const newState: SessionState = {
+        count: currentState?.count || 0,
+        topic,
+        error: '',
+        generated_at: Date.now()
+      };
+      writeState(sessionId, newState, tempDir);
+    }
+  } finally {
+    releaseLock(sessionId, tempDir);
+  }
+}
