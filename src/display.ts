@@ -1,6 +1,6 @@
 // src/display.ts
-import { nextGenerationAt } from './schedule';
-import type { SessionState } from './types';
+import { nextGenerationAt } from './schedule.js';
+import type { SessionState } from './types.js';
 
 export function formatAge(timestamp: number): string {
   const age = (Date.now() - timestamp) / 1000;

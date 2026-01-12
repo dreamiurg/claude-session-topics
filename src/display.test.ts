@@ -1,7 +1,7 @@
 // src/display.test.ts
 import { describe, it, expect } from 'vitest';
-import { formatTopicDisplay, formatAge } from './display';
-import type { SessionState } from './types';
+import { formatTopicDisplay, formatAge } from './display.js';
+import type { SessionState } from './types.js';
 
 describe('Topic Display', () => {
   describe('formatAge', () => {

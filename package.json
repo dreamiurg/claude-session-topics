@@ -19,6 +19,7 @@
   "license": "MIT",
   "bin": {
     "claude-topic-generator": "./dist/cli.js",
+    "claude-topic-display": "./dist/cli-display.js",
     "claude-topic-force": "./dist/cli-force-topic.js"
   },
   "scripts": {
