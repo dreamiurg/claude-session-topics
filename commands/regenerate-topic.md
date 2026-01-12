@@ -8,10 +8,10 @@ Force-generate a new topic immediately, bypassing the message threshold.
 
 ## Instructions
 
-Run the force-topic script with the current session ID:
+Run the force-topic command with the current session ID:
 
 ```bash
-~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/scripts/force-topic "$CLAUDE_SESSION_ID"
+node ~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/dist/cli-force-topic.js "$CLAUDE_SESSION_ID"
 ```
 
 The script will:
