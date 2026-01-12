@@ -39,8 +39,11 @@ function main() {
     const state = readState(sessionId);
     const display = formatTopicDisplay(state);
     console.log(display);
-  } catch {
-    // Silent failure
+  } catch (error) {
+    // Silent failure unless debug mode
+    if (process.env.CLAUDE_TOPIC_DEBUG) {
+      console.error('[ERROR]', error);
+    }
   }
 }
 
