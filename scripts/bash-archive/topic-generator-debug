@@ -1,0 +1,5 @@
+#!/bin/bash
+# Wrapper for topic-generator with debug logging
+export CLAUDE_TOPIC_DEBUG=1
+export CLAUDE_TOPIC_DEBUG_LOG=/tmp/topic-debug.log
+cat | "$(dirname "$0")/topic-generator" 2>> /tmp/topic-debug.log
