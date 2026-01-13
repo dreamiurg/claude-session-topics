@@ -55,8 +55,9 @@ describe('CLI Entry Points', () => {
 
     await new Promise<void>((resolve) => {
       cli.on('close', (code) => {
-        // Should exit cleanly without errors (silent failure for hooks)
-        expect(code).toBe(0);
+        // Should exit with code 1 for malformed JSON
+        expect(code).toBe(1);
+        // Stderr is empty unless debug mode is on
         expect(stderr).toBe('');
         resolve();
       });
