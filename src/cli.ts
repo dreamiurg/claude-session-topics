@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { appendFileSync, readFileSync } from 'node:fs';
+import { appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { handleStopHook } from './hook-handler.js';
@@ -14,21 +14,42 @@ try {
   // Ignore
 }
 
+async function readStdin(): Promise<string> {
+  return new Promise((resolve) => {
+    let data = '';
+    process.stdin.setEncoding('utf-8');
+    process.stdin.on('data', (chunk) => {
+      data += chunk;
+    });
+    process.stdin.on('end', () => {
+      resolve(data);
+    });
+  });
+}
+
 async function main() {
   if (process.env.CLAUDE_TOPIC_DEBUG) {
     console.error('[DEBUG] CLI starting');
   }
 
   try {
-    // Read JSON from stdin
+    // Read JSON from stdin asynchronously
     if (process.env.CLAUDE_TOPIC_DEBUG) {
       console.error('[DEBUG] Reading stdin');
     }
-    const input = readFileSync(0, 'utf-8');
+    const input = await readStdin();
 
     if (process.env.CLAUDE_TOPIC_DEBUG) {
       console.error('[DEBUG] Parsing JSON');
     }
+
+    if (!input || input.trim() === '') {
+      if (process.env.CLAUDE_TOPIC_DEBUG) {
+        console.error('[DEBUG] Empty input received');
+      }
+      return;
+    }
+
     const hookInput = JSON.parse(input) as HookInput;
 
     if (process.env.CLAUDE_TOPIC_DEBUG) {
