@@ -1,7 +1,18 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { appendFileSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { handleStopHook } from './hook-handler.js';
 import type { HookInput } from './types.js';
+
+// Log that we started IMMEDIATELY
+try {
+  const logPath = join(tmpdir(), 'claude-topic-invocation.log');
+  const timestamp = new Date().toISOString();
+  appendFileSync(logPath, `[${timestamp}] Hook invoked\n`);
+} catch {
+  // Ignore
+}
 
 async function main() {
   if (process.env.CLAUDE_TOPIC_DEBUG) {
