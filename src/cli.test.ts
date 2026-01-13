@@ -118,9 +118,9 @@ describe('CLI Entry Points', () => {
     await new Promise<void>((resolve) => {
       cli.on('close', (code) => {
         expect(code).toBe(0);
-        // Should either show default message or empty (depends on timing)
+        // Should show circle with conversational message or empty (depends on timing)
         if (stdout.trim()) {
-          expect(stdout.trim()).toMatch(/Topic:|after/);
+          expect(stdout.trim()).toMatch(/^[○◔◑◕●] .+$/);
         }
         resolve();
       });

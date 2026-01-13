@@ -33,7 +33,7 @@ describe('Hook Handler', () => {
     expect(state?.count).toBe(1);
   });
 
-  it('should skip if stop_hook_active', async () => {
+  it('should process even when stop_hook_active is true', async () => {
     const input: HookInput = {
       session_id: 'a1b2c3d4-e5f6-4789-a123-b456c789d012',
       cwd: '/tmp',
@@ -47,7 +47,8 @@ describe('Hook Handler', () => {
     const { readState } = await import('./state.js');
     const state = readState('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
 
-    expect(state).toBeNull();
+    // Should still create state (recursion prevented by no-hooks.json)
+    expect(state?.count).toBe(1);
   });
 
   it('should skip invalid session ID', async () => {

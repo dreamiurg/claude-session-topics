@@ -1,5 +1,32 @@
 // src/topic-generator.ts
-import { $ } from 'zx';
+import { appendFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import removeMd from 'remove-markdown';
+
+function log(message: string, data?: unknown) {
+  try {
+    const logPath = join(tmpdir(), 'claude-topic-generator.log');
+    const timestamp = new Date().toISOString();
+    const dataStr = data ? ` ${JSON.stringify(data)}` : '';
+    appendFileSync(logPath, `[${timestamp}] ${message}${dataStr}\n`);
+  } catch {
+    // Ignore logging errors
+  }
+}
+
+/**
+ * Remove markdown formatting from topic text for clean status line display
+ */
+function sanitizeMarkdown(text: string): string {
+  // Use remove-markdown package instead of DIY regex patterns
+  return removeMd(text, {
+    stripListLeaders: true,
+    gfm: true,
+    useImgAltText: false
+  }).trim();
+}
 
 export function buildPrompt(source: 'claude-mem' | 'transcript', context: string): string {
   const sourceLabel = source === 'claude-mem' ? 'session observations' : 'Claude Code session';
@@ -26,47 +53,59 @@ Topic:`;
 export async function generateTopic(
   context: string,
   source: 'claude-mem' | 'transcript',
-  timeoutSec = 30
+  timeoutMs = 30000
 ): Promise<string | null> {
   try {
-    $.verbose = false;
+    log('generateTopic called', { source, contextLength: context.length, timeoutMs });
 
     const prompt = buildPrompt(source, context);
+    log('Prompt built', { promptLength: prompt.length });
 
-    // Use timeout command if available
-    let command = 'claude';
-    try {
-      await $`which timeout`;
-      command = 'timeout';
-    } catch {
-      try {
-        await $`which gtimeout`;
-        command = 'gtimeout';
-      } catch {
-        // No timeout available
-      }
+    // Escape single quotes in the prompt for shell safety
+    const escapedPrompt = prompt.replace(/'/g, "'\\''");
+
+    // Determine path to no-hooks.json
+    // In production: use CLAUDE_PLUGIN_ROOT
+    // In testing: resolve relative to this file
+    const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+    let settingsPath: string;
+
+    if (pluginRoot) {
+      settingsPath = `${pluginRoot}/no-hooks.json`;
+      log('Using production settings path', { settingsPath });
+    } else {
+      // Testing mode: resolve relative to dist directory
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const projectRoot = join(__dirname, '..');
+      settingsPath = join(projectRoot, 'no-hooks.json');
+      log('Using test settings path', { settingsPath });
     }
 
-    const fullCommand =
-      command === 'claude'
-        ? ['claude', '--model', 'haiku', '--print', '--no-session-persistence', '--tools', '']
-        : [
-            command,
-            String(timeoutSec),
-            'claude',
-            '--model',
-            'haiku',
-            '--print',
-            '--no-session-persistence',
-            '--tools',
-            ''
-          ];
+    // Use the same approach as the working bash script
+    // NOTE: The --tools "" flag is crucial - without it, the command hangs
+    // CRITICAL: --settings with disableAllHooks prevents infinite recursion if this runs from a Stop hook
+    const command = `printf '%s' '${escapedPrompt}' | claude --model haiku --print --no-session-persistence --settings "${settingsPath}" --tools "" 2>/dev/null | head -1`;
+    log('Executing claude command', { command: command.substring(0, 200) });
 
-    const result = await $`echo ${prompt} | ${fullCommand}`;
-    const topic = result.stdout.trim().split('\n')[0];
+    const { execSync } = await import('node:child_process');
+    const result = execSync(command, {
+      encoding: 'utf-8',
+      timeout: timeoutMs,
+      maxBuffer: 1024 * 1024,
+      shell: '/bin/bash'
+    });
 
-    return topic || null;
-  } catch {
+    log('Command completed', { resultLength: result.length });
+
+    const rawTopic = result.trim();
+    const topic = rawTopic ? sanitizeMarkdown(rawTopic) : null;
+    log('Topic extracted', { rawTopic, sanitizedTopic: topic, topicLength: topic?.length });
+
+    return topic;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    log('ERROR in generateTopic', { error: errorMsg });
     return null;
   }
 }
