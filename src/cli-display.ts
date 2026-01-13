@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // src/cli-display.ts
-import { readFileSync } from 'node:fs';
 import { formatTopicDisplay } from './display.js';
 import { readState } from './state.js';
 import { validateSessionId } from './validation.js';
@@ -9,7 +8,20 @@ interface StatusLineInput {
   session_id?: string;
 }
 
-function main() {
+async function readStdin(): Promise<string> {
+  return new Promise((resolve) => {
+    let data = '';
+    process.stdin.setEncoding('utf-8');
+    process.stdin.on('data', (chunk) => {
+      data += chunk;
+    });
+    process.stdin.on('end', () => {
+      resolve(data);
+    });
+  });
+}
+
+async function main() {
   try {
     // Read from stdin if available (ccstatusline format)
     let sessionId: string | undefined;
@@ -20,8 +32,8 @@ function main() {
     }
 
     // Fall back to stdin if no argument provided
-    if (!sessionId && process.stdin.isTTY === false) {
-      const input = readFileSync(0, 'utf-8');
+    if (!sessionId && process.stdin.isTTY !== true) {
+      const input = await readStdin();
       if (input.trim()) {
         const parsed = JSON.parse(input) as StatusLineInput;
         sessionId = parsed.session_id;
