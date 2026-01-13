@@ -40,15 +40,44 @@ async function main() {
       console.error('[DEBUG] Main function completing');
     }
   } catch (error) {
+    // Log errors to temp file for debugging
+    try {
+      const fs = await import('node:fs');
+      const os = await import('node:os');
+      const path = await import('node:path');
+      const logPath = path.join(os.tmpdir(), 'claude-topic-error.log');
+      const timestamp = new Date().toISOString();
+      const errorMsg = error instanceof Error ? error.stack : String(error);
+      fs.appendFileSync(logPath, `[${timestamp}] ${errorMsg}\n\n`);
+    } catch {
+      // Ignore logging errors
+    }
+
     // Silent failure - hooks should not interrupt Claude
     if (process.env.CLAUDE_TOPIC_DEBUG) {
       console.error('[ERROR]', error);
     }
+
+    // Exit with error code
+    process.exit(1);
   }
 }
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (error) => {
+  // Log to temp file
+  try {
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const logPath = path.join(os.tmpdir(), 'claude-topic-error.log');
+    const timestamp = new Date().toISOString();
+    const errorMsg = error instanceof Error ? error.stack : String(error);
+    fs.appendFileSync(logPath, `[${timestamp}] UNHANDLED REJECTION: ${errorMsg}\n\n`);
+  } catch {
+    // Ignore logging errors
+  }
+
   if (process.env.CLAUDE_TOPIC_DEBUG) {
     console.error('[UNHANDLED REJECTION]', error);
   }
@@ -63,6 +92,19 @@ main()
     process.exit(0);
   })
   .catch((error) => {
+    // Log to temp file
+    try {
+      const fs = require('node:fs');
+      const os = require('node:os');
+      const path = require('node:path');
+      const logPath = path.join(os.tmpdir(), 'claude-topic-error.log');
+      const timestamp = new Date().toISOString();
+      const errorMsg = error instanceof Error ? error.stack : String(error);
+      fs.appendFileSync(logPath, `[${timestamp}] FATAL: ${errorMsg}\n\n`);
+    } catch {
+      // Ignore logging errors
+    }
+
     if (process.env.CLAUDE_TOPIC_DEBUG) {
       console.error('[FATAL]', error);
     }
