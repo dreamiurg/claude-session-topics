@@ -28,3 +28,12 @@ coverage/
 # Build artifacts
 dist/
 build/
+
+# Planning documents
+docs/plans/
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude-mem context
+.claude-plugin/CLAUDE.md

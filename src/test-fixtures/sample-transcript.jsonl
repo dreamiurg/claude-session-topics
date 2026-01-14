@@ -1,0 +1,3 @@
+{"type":"user","message":{"role":"user","content":"Hello, can you help me?"},"timestamp":"2026-01-12T10:00:00Z"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Of course! How can I assist you?"}]},"timestamp":"2026-01-12T10:00:01Z"}
+{"type":"user","message":{"role":"user","content":"I need to debug this code"},"timestamp":"2026-01-12T10:00:05Z"}

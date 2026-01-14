@@ -1,5 +1,7 @@
 {
-  "name": "claude-session-topics-marketplace",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-session-topics-local",
+  "description": "Local development marketplace for claude-session-topics",
   "owner": {
     "name": "dreamiurg",
     "url": "https://github.com/dreamiurg"
@@ -7,12 +9,13 @@
   "plugins": [
     {
       "name": "claude-session-topics",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/dreamiurg/claude-session-topics.git"
-      },
+      "source": "./",
       "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
-      "version": "1.7.2"
+      "version": "2.0.0",
+      "author": {
+        "name": "dreamiurg",
+        "email": "dreamiurg@users.noreply.github.com"
+      }
     }
   ]
 }

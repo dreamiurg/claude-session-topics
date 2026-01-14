@@ -57,8 +57,7 @@ Topics include an age indicator so you know how fresh they are.
 ## Requirements
 
 - [Claude Code](https://claude.ai/code) CLI
-- `jq`
-- Bash 4.0+
+- Node.js 18+
 
 ## How It Works
 
@@ -73,6 +72,33 @@ A [stop hook](hooks/hooks.json) fires after each Claude response, triggering
 [session-cleanup](scripts/session-cleanup) removes temp files when the session ends.
 
 For the full story: [Session Topic Summaries in Claude Code Status Line][blog-post]
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- TypeScript 5.7+
+
+### Build
+
+```bash
+npm install
+npm run build
+```
+
+### Test
+
+```bash
+npm test
+npm run test:watch  # Watch mode
+```
+
+### Type Check
+
+```bash
+npm run lint
+```
 
 ---
 
