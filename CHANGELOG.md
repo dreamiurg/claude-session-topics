@@ -9,6 +9,24 @@
 * auto-discover session ID from recent state files ([#32](https://github.com/dreamiurg/claude-session-topics/issues/32)) ([70e1d3c](https://github.com/dreamiurg/claude-session-topics/commit/70e1d3c))
 * use rough age estimates instead of precise counts ([#34](https://github.com/dreamiurg/claude-session-topics/issues/34)) ([0da01b5](https://github.com/dreamiurg/claude-session-topics/commit/0da01b5))
 
+## [2.0.0](https://github.com/dreamiurg/claude-session-topics/compare/v1.7.2...v2.0.0) (2026-01-14)
+
+
+### Features
+
+* implement Fibonacci-style topic generation schedule ([#41](https://github.com/dreamiurg/claude-session-topics/issues/41)) ([14f379b](https://github.com/dreamiurg/claude-session-topics/commit/14f379b57247969f7ba04b4dabdf24306579c211))
+* TypeScript rewrite with UX improvements and proper-lockfile migration ([1c9ba05](https://github.com/dreamiurg/claude-session-topics/commit/1c9ba05e04643e9544ef3277b2dbdb7e9d2aa6c0))
+
+
+### Bug Fixes
+
+* apply same claude-mem session ID lookup fix to force-topic ([#39](https://github.com/dreamiurg/claude-session-topics/issues/39)) ([7e13585](https://github.com/dreamiurg/claude-session-topics/commit/7e1358539b9a0f51fb69e6fde3c51e59e218263a))
+
+
+### Miscellaneous Chores
+
+* release 2.0.0 ([2930405](https://github.com/dreamiurg/claude-session-topics/commit/2930405a7d58a7f8defb6d2e4a3a6eedf48de4af))
+
 ## [1.7.2](https://github.com/dreamiurg/claude-session-topics/compare/v1.7.1...v1.7.2) (2026-01-12)
 
 
