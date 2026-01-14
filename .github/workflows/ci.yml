@@ -14,20 +14,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install shellcheck
-        run: sudo apt-get install -y shellcheck
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Lint shell scripts
-        run: |
-          find . -name "*.sh" -type f | xargs shellcheck -x || true
-          shellcheck -x scripts/topic-generator scripts/topic-display scripts/session-cleanup lib/common.sh
+      - name: Install dependencies
+        run: bun install
 
-      - name: Check script syntax
-        run: |
-          for script in scripts/topic-generator scripts/topic-display scripts/session-cleanup; do
-            bash -n "$script"
-          done
-          bash -n lib/common.sh
+      - name: TypeScript type checking
+        run: bun run typecheck
+
+      - name: Biome lint and format
+        run: bun run check:ci
+
+      - name: Build TypeScript
+        run: bun run build
+
+      - name: Run tests
+        run: bun run test:ci
 
   security:
     name: Security

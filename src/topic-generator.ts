@@ -28,15 +28,28 @@ function sanitizeMarkdown(text: string): string {
   }).trim();
 }
 
-export function buildPrompt(source: 'claude-mem' | 'transcript', context: string): string {
+export function buildPrompt(
+  source: 'claude-mem' | 'transcript',
+  context: string,
+  previousTopic?: string
+): string {
   const sourceLabel = source === 'claude-mem' ? 'session observations' : 'Claude Code session';
   const contextLabel = source === 'claude-mem' ? 'Session observations' : 'Recent conversation';
 
+  // If we have a previous topic, extract theme and ask AI to preserve it unless session shifted
+  const continuityInstructions = previousTopic
+    ? `\nPrevious topic: "${previousTopic}"
+
+IMPORTANT: Keep the THEME (first part before ":") STABLE unless the session has fundamentally shifted to a different area of work. Only update the ACTIVITY (part after ":") to reflect current focus. The theme should span multiple generations and capture the meta-level work, while activity captures what's happening right now.
+
+If the session is still working on the same general area (same theme), preserve that theme exactly and only update the activity. Only change the theme if the work has moved to a completely different area.`
+    : '\nThis is the first topic generation. Choose a theme that will be stable across multiple work items.';
+
   return `Based on these ${sourceLabel}, generate a terse topic line.
 
-Format: "<topic>: <activity>" where:
-- Topic captures the overall theme (2-4 words)
-- Activity is a SHORT gerund phrase (2-3 words max, e.g., "fixing tests", "adding auth")
+Format: "<theme>: <activity>" where:
+- THEME: Meta-level area of work (2-4 words). Should be STABLE across multiple generations.
+- ACTIVITY: Current specific focus (2-3 words max gerund phrase, e.g., "fixing tests", "adding auth")${continuityInstructions}
 
 Examples:
 - Database migration: updating schema
@@ -53,12 +66,18 @@ Topic:`;
 export async function generateTopic(
   context: string,
   source: 'claude-mem' | 'transcript',
+  previousTopic?: string,
   timeoutMs = 30000
 ): Promise<string | null> {
   try {
-    log('generateTopic called', { source, contextLength: context.length, timeoutMs });
+    log('generateTopic called', {
+      source,
+      contextLength: context.length,
+      previousTopic,
+      timeoutMs
+    });
 
-    const prompt = buildPrompt(source, context);
+    const prompt = buildPrompt(source, context, previousTopic);
     log('Prompt built', { promptLength: prompt.length });
 
     // Escape single quotes in the prompt for shell safety
