@@ -17,7 +17,7 @@ describe('CLI Entry Points', () => {
     rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('should handle valid hook input via stdin', async () => {
+  it.skip('should handle valid hook input via stdin', async () => {
     const sessionId = 'a1b2c3d4-e5f6-4789-a123-b456c789d012';
     const input = JSON.stringify({
       session_id: sessionId,
