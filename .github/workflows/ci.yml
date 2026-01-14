@@ -28,6 +28,9 @@ jobs:
       - name: Biome lint and format
         run: bun run check:ci
 
+      - name: Build TypeScript
+        run: bun run build
+
       - name: Run tests
         run: bun run test:ci
 
