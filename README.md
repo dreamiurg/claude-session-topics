@@ -27,17 +27,24 @@ To force a topic refresh anytime:
 
 ## What You Get
 
-Topics follow a `<theme>: <activity>` format:
+Topics follow a `<theme>: <activity>` format with a circle progress indicator:
 
 ```text
-OAuth debug: fixing validation
-Blog post: adding snippets
-API refactor: updating endpoints
+◔ OAuth debug: fixing validation
+◑ Blog post: adding snippets
+◕ API refactor: updating endpoints
 ```
 
-The plugin uses Claude Haiku to summarize your session every 10 messages.
-Generation happens in the background (<50ms overhead).
-Topics include an age indicator so you know how fresh they are.
+The circle shows progress toward the next topic refresh:
+
+- ○ (empty) → ◔ → ◑ → ◕ → ● (full)
+
+Topics generate using an adaptive schedule:
+
+- Messages 1, 2, 3, 5, 8: Early updates while context develops
+- Every 10 messages after that: Regular refreshes
+
+Generation happens in the background (<50ms overhead) using Claude Haiku to summarize your session.
 
 ## Configuration
 
@@ -57,7 +64,7 @@ Topics include an age indicator so you know how fresh they are.
 ## Requirements
 
 - [Claude Code](https://claude.ai/code) CLI
-- Node.js 18+
+- [Bun](https://bun.sh) 1.0+ or Node.js 18+
 
 ## How It Works
 
@@ -68,7 +75,7 @@ A [stop hook](hooks/hooks.json) fires after each Claude response, triggering
 2. Sends it to Haiku with a summary prompt
 3. Writes to `$TMPDIR/claude-topic-<session_id>.json`
 
-[topic-display](scripts/topic-display) reads the state file and outputs the topic with age.
+[topic-display](scripts/topic-display) reads the state file and outputs the topic with progress indicator.
 [session-cleanup](scripts/session-cleanup) removes temp files when the session ends.
 
 For the full story: [Session Topic Summaries in Claude Code Status Line][blog-post]
@@ -77,27 +84,27 @@ For the full story: [Session Topic Summaries in Claude Code Status Line][blog-po
 
 ### Prerequisites
 
-- Node.js 18+
+- [Bun](https://bun.sh) 1.0+
 - TypeScript 5.7+
 
 ### Build
 
 ```bash
-npm install
-npm run build
+bun install
+bun run build
 ```
 
 ### Test
 
 ```bash
-npm test
-npm run test:watch  # Watch mode
+bun test
+bun run test:watch  # Watch mode
 ```
 
 ### Type Check
 
 ```bash
-npm run lint
+bun run lint
 ```
 
 ---
