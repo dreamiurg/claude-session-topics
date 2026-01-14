@@ -34,17 +34,24 @@ async function main() {
   });
 
   try {
+    // Read current state first to get previous topic and preserve count
+    log(sessionId, 'Reading current state');
+    const currentState = readState(sessionId, tempDir);
+    log(sessionId, 'Current state read', {
+      count: currentState?.count,
+      previousTopic: currentState?.topic
+    });
+
     log(sessionId, 'Calling generateTopic');
-    const topic = await generateTopic(context, source as 'claude-mem' | 'transcript');
+    const topic = await generateTopic(
+      context,
+      source as 'claude-mem' | 'transcript',
+      currentState?.topic
+    );
 
     log(sessionId, 'generateTopic returned', { topic, topicLength: topic?.length });
 
     if (topic) {
-      // Read current state to preserve count
-      log(sessionId, 'Reading current state');
-      const currentState = readState(sessionId, tempDir);
-      log(sessionId, 'Current state read', { count: currentState?.count });
-
       const newState: SessionState = {
         count: currentState?.count || 0,
         topic,

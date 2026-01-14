@@ -47,17 +47,22 @@ async function main() {
       process.exit(1);
     }
 
+    // Read current state to get previous topic for continuity
+    const { readState } = await import('./state.js');
+    const currentState = readState(session_id, cwd);
+    const previousTopic = currentState?.topic;
+
     console.log('Generating topic...');
-    const topic = await generateTopic(context, source);
+    const topic = await generateTopic(context, source, previousTopic);
 
     if (!topic) {
       console.error('Failed to generate topic');
       process.exit(1);
     }
 
-    // Update state
+    // Update state (preserve count if it exists)
     const state = {
-      count: 0,
+      count: currentState?.count || 0,
       topic,
       error: '',
       generated_at: Date.now()
