@@ -9,9 +9,21 @@ import { validateSessionId } from './validation.js';
 
 async function main() {
   try {
-    // Read session ID from stdin (skill format)
-    const input = readFileSync(0, 'utf-8');
-    const { session_id, cwd } = JSON.parse(input) as { session_id: string; cwd: string };
+    let session_id: string;
+    let cwd: string;
+
+    // Check if we have command-line arguments
+    if (process.argv.length > 2) {
+      // Called with arguments: node cli-force-topic.js <session-id> [cwd]
+      session_id = process.argv[2];
+      cwd = process.argv[3] || process.cwd();
+    } else {
+      // Read from stdin (skill format)
+      const input = readFileSync(0, 'utf-8');
+      const parsed = JSON.parse(input) as { session_id: string; cwd: string };
+      session_id = parsed.session_id;
+      cwd = parsed.cwd;
+    }
 
     if (!validateSessionId(session_id)) {
       console.error('Invalid session ID format');

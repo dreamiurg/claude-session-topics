@@ -11,7 +11,13 @@ Force-generate a new topic immediately, bypassing the message threshold.
 Run the force-topic command with the current session ID:
 
 ```bash
-node ~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/dist/cli-force-topic.js "$CLAUDE_SESSION_ID"
+if [ -n "$CLAUDE_SESSION_ID" ]; then
+  echo "{\"session_id\":\"$CLAUDE_SESSION_ID\",\"cwd\":\"$PWD\"}" | node "$CLAUDE_PLUGIN_ROOT/dist/cli-force-topic.js"
+else
+  echo "Error: CLAUDE_SESSION_ID environment variable not set"
+  echo "Usage: node $CLAUDE_PLUGIN_ROOT/dist/cli-force-topic.js <session-id>"
+  exit 1
+fi
 ```
 
 The script will:
