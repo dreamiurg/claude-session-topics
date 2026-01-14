@@ -28,19 +28,33 @@ describe('CLI Entry Points', () => {
     });
 
     const cli = spawn('node', ['dist/cli.js'], {
-      env: { ...process.env, TMPDIR: tempDir }
+      env: { ...process.env, TMPDIR: tempDir, CLAUDE_TOPIC_DEBUG: '1' }
+    });
+
+    let stdout = '';
+    let stderr = '';
+    cli.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    cli.stderr.on('data', (data) => {
+      stderr += data.toString();
     });
 
     cli.stdin.write(input);
     cli.stdin.end();
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
+        if (code !== 0) {
+          console.error('CLI exited with code:', code);
+          console.error('STDOUT:', stdout);
+          console.error('STDERR:', stderr);
+        }
         expect(code).toBe(0);
         resolve();
       });
     });
-  });
+  }, 10000);
 
   it('should handle malformed JSON gracefully', async () => {
     const cli = spawn('node', ['dist/cli.js']);
@@ -54,7 +68,7 @@ describe('CLI Entry Points', () => {
     });
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
         // Should exit with code 1 for malformed JSON
         expect(code).toBe(1);
         // Stderr is empty unless debug mode is on
@@ -70,7 +84,7 @@ describe('CLI Entry Points', () => {
     cli.stdin.end();
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
         // Should exit cleanly
         expect(code).toBe(0);
         resolve();
@@ -91,7 +105,7 @@ describe('CLI Entry Points', () => {
     cli.stdin.end();
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
         // Should exit cleanly without creating state
         expect(code).toBe(0);
         resolve();
@@ -116,7 +130,7 @@ describe('CLI Entry Points', () => {
     });
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
         expect(code).toBe(0);
         // Should show circle with conversational message or empty (depends on timing)
         if (stdout.trim()) {
@@ -140,7 +154,7 @@ describe('CLI Entry Points', () => {
     });
 
     await new Promise<void>((resolve) => {
-      cli.on('close', (code) => {
+      cli.on('close', (code: number | null) => {
         // Should fail with non-zero exit code
         expect(code).not.toBe(0);
         // Should have some error message (either about context or resource)
