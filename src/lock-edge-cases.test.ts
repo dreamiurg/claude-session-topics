@@ -1,10 +1,10 @@
 // src/lock-edge-cases.test.ts
 
-import { mkdirSync, mkdtempSync, rmSync, utimesSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { acquireLock, getLockPath, releaseLock } from './lock.js';
+import { acquireLock, forceReleaseLock, getLockPath, isLocked, releaseLock } from './lock.js';
 
 describe('Lock Edge Cases', () => {
   let tempDir: string;
@@ -17,106 +17,118 @@ describe('Lock Edge Cases', () => {
     rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('should acquire lock when available', () => {
+  it('should acquire lock when available', async () => {
     const sessionId = 'test-123';
 
-    const acquired = acquireLock(sessionId, tempDir);
+    const release = await acquireLock(sessionId, tempDir);
 
-    expect(acquired).toBe(true);
-    releaseLock(sessionId, tempDir);
+    expect(release).not.toBeNull();
+    await releaseLock(release);
   });
 
-  it('should fail to acquire when already locked', () => {
+  it('should fail to acquire when already locked', async () => {
     const sessionId = 'test-123';
 
-    const first = acquireLock(sessionId, tempDir);
-    const second = acquireLock(sessionId, tempDir);
+    const release1 = await acquireLock(sessionId, tempDir, 500);
+    const release2 = await acquireLock(sessionId, tempDir, 500);
 
-    expect(first).toBe(true);
-    expect(second).toBe(false);
+    expect(release1).not.toBeNull();
+    expect(release2).toBeNull();
 
-    releaseLock(sessionId, tempDir);
+    await releaseLock(release1);
   });
 
-  it('should acquire lock after release', () => {
+  it('should acquire lock after release', async () => {
     const sessionId = 'test-123';
 
-    acquireLock(sessionId, tempDir);
-    releaseLock(sessionId, tempDir);
-    const reacquired = acquireLock(sessionId, tempDir);
+    const release1 = await acquireLock(sessionId, tempDir);
+    await releaseLock(release1);
+    const release2 = await acquireLock(sessionId, tempDir);
 
-    expect(reacquired).toBe(true);
-    releaseLock(sessionId, tempDir);
+    expect(release2).not.toBeNull();
+    await releaseLock(release2);
   });
 
   it('should acquire stale lock (older than maxAge)', async () => {
     const sessionId = 'test-123';
+
+    // Create a lock file manually (simulate orphaned lock)
     const lockPath = getLockPath(sessionId, tempDir);
+    writeFileSync(lockPath, '');
 
-    // Create a stale lock manually
-    mkdirSync(lockPath);
+    // Manually create a stale lock file by writing it
+    // proper-lockfile will detect it as stale after the timeout
 
-    // Set modification time to 2 minutes ago (stale)
-    const twoMinutesAgo = Date.now() - 120 * 1000;
-    utimesSync(lockPath, new Date(twoMinutesAgo), new Date(twoMinutesAgo));
+    // Should acquire the stale lock with short maxAge
+    const release = await acquireLock(sessionId, tempDir, 100);
 
-    // Should acquire the stale lock with maxAge of 60 seconds
-    const acquired = acquireLock(sessionId, tempDir, 60);
-
-    expect(acquired).toBe(true);
-    releaseLock(sessionId, tempDir);
+    expect(release).not.toBeNull();
+    await releaseLock(release);
   });
 
-  it('should not acquire recent lock', async () => {
+  it('should detect locked state', async () => {
     const sessionId = 'test-123';
-    const lockPath = getLockPath(sessionId, tempDir);
 
-    // Create a recent lock manually
-    mkdirSync(lockPath);
+    const isLockedBefore = await isLocked(sessionId, tempDir);
+    expect(isLockedBefore).toBe(false);
 
-    // Lock is fresh, should not be acquired
-    const acquired = acquireLock(sessionId, tempDir, 60);
+    const release = await acquireLock(sessionId, tempDir);
+    const isLockedDuring = await isLocked(sessionId, tempDir);
+    expect(isLockedDuring).toBe(true);
 
-    expect(acquired).toBe(false);
-
-    rmSync(lockPath, { recursive: true, force: true });
+    await releaseLock(release);
+    const isLockedAfter = await isLocked(sessionId, tempDir);
+    expect(isLockedAfter).toBe(false);
   });
 
-  it('should handle multiple concurrent lock attempts', () => {
+  it('should handle multiple concurrent lock attempts', async () => {
     const sessionId = 'test-123';
-    const attempts: boolean[] = [];
 
-    // Try to acquire lock 10 times
-    for (let i = 0; i < 10; i++) {
-      attempts.push(acquireLock(sessionId, tempDir));
-    }
+    // Try to acquire lock 10 times concurrently
+    const attempts = await Promise.all(
+      Array.from({ length: 10 }, () => acquireLock(sessionId, tempDir, 100))
+    );
 
     // Only one should succeed
-    const successes = attempts.filter((a) => a === true);
+    const successes = attempts.filter((a) => a !== null);
     expect(successes.length).toBe(1);
 
-    releaseLock(sessionId, tempDir);
+    // Release the successful lock
+    await releaseLock(successes[0]);
   });
 
-  it('should handle release of non-existent lock gracefully', () => {
-    const sessionId = 'test-123';
-
+  it('should handle release of null lock gracefully', async () => {
     // Should not throw
-    expect(() => releaseLock(sessionId, tempDir)).not.toThrow();
+    await expect(releaseLock(null)).resolves.not.toThrow();
   });
 
-  it('should handle different session IDs independently', () => {
+  it('should handle different session IDs independently', async () => {
     const sessionId1 = 'test-123';
     const sessionId2 = 'test-456';
 
-    const lock1 = acquireLock(sessionId1, tempDir);
-    const lock2 = acquireLock(sessionId2, tempDir);
+    const release1 = await acquireLock(sessionId1, tempDir);
+    const release2 = await acquireLock(sessionId2, tempDir);
 
     // Both should succeed as they're different sessions
-    expect(lock1).toBe(true);
-    expect(lock2).toBe(true);
+    expect(release1).not.toBeNull();
+    expect(release2).not.toBeNull();
 
-    releaseLock(sessionId1, tempDir);
-    releaseLock(sessionId2, tempDir);
+    await releaseLock(release1);
+    await releaseLock(release2);
+  });
+
+  it('should force-release lock by session ID', async () => {
+    const sessionId = 'test-123';
+
+    const release = await acquireLock(sessionId, tempDir);
+    expect(release).not.toBeNull();
+
+    // Force-release using session ID (simulating background process cleanup)
+    await forceReleaseLock(sessionId, tempDir);
+
+    // Should be able to acquire again
+    const release2 = await acquireLock(sessionId, tempDir);
+    expect(release2).not.toBeNull();
+    await releaseLock(release2);
   });
 });

@@ -66,7 +66,8 @@ export async function handleStopHook(input: HookInput, tempDir?: string): Promis
   log(session_id, 'Should generate topic', { count: state.count });
 
   // Try to acquire lock
-  if (!acquireLock(session_id, tempDir)) {
+  const release = await acquireLock(session_id, tempDir);
+  if (!release) {
     log(session_id, 'Could not acquire lock - another process generating');
     // Another process is generating, just update count
     state.generated_at = Date.now();
@@ -101,7 +102,7 @@ export async function handleStopHook(input: HookInput, tempDir?: string): Promis
       state.error = 'waiting for conversation';
       state.generated_at = Date.now();
       writeState(session_id, state, tempDir);
-      releaseLock(session_id, tempDir);
+      await releaseLock(release);
       return;
     }
 
@@ -134,7 +135,7 @@ export async function handleStopHook(input: HookInput, tempDir?: string): Promis
     log(session_id, 'ERROR in handleStopHook', {
       error: error instanceof Error ? error.message : String(error)
     });
-    releaseLock(session_id, tempDir);
+    await releaseLock(release);
     state.error = error instanceof Error ? error.message : 'unknown error';
     state.generated_at = Date.now();
     writeState(session_id, state, tempDir);

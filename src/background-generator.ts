@@ -2,7 +2,7 @@
 import { appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { releaseLock } from './lock.js';
+import { forceReleaseLock } from './lock.js';
 import { readState, writeState } from './state.js';
 import { generateTopic } from './topic-generator.js';
 import type { SessionState } from './types.js';
@@ -68,9 +68,13 @@ async function main() {
     }
   } finally {
     log(sessionId, 'Releasing lock');
-    releaseLock(sessionId, tempDir);
+    await forceReleaseLock(sessionId, tempDir);
     log(sessionId, 'Background generator exiting');
   }
 }
 
-main();
+// Execute main function
+main().catch((err) => {
+  console.error('Fatal error in background generator:', err);
+  process.exit(1);
+});

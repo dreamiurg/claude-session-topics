@@ -104,17 +104,22 @@ describe('Hook Handler', () => {
       permission_mode: 'default'
     };
 
-    const { acquireLock } = await import('./lock.js');
+    const { acquireLock, releaseLock } = await import('./lock.js');
     const { readState } = await import('./state.js');
 
-    // Acquire lock manually
-    acquireLock('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
+    // Acquire lock manually to block the hook handler
+    const release = await acquireLock('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
 
-    // First call - should trigger generation (count 1 is Fibonacci threshold)
-    await handleStopHook(input, tempDir);
-    const state = readState('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
+    try {
+      // First call - should trigger generation (count 1 is Fibonacci threshold)
+      await handleStopHook(input, tempDir);
+      const state = readState('a1b2c3d4-e5f6-4789-a123-b456c789d012', tempDir);
 
-    // Should still increment count even when locked
-    expect(state?.count).toBe(1);
+      // Should still increment count even when locked
+      expect(state?.count).toBe(1);
+    } finally {
+      // Clean up the lock
+      await releaseLock(release);
+    }
   });
 });
