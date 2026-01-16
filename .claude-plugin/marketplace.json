@@ -11,7 +11,7 @@
       "name": "claude-session-topics",
       "source": "./",
       "description": "Know what each session is about. Displays topics like '# OAuth debug: fixing schema' in your status line",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "author": {
         "name": "dreamiurg",
         "email": "dreamiurg@users.noreply.github.com"
