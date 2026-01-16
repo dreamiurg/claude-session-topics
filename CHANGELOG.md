@@ -9,6 +9,13 @@
 * auto-discover session ID from recent state files ([#32](https://github.com/dreamiurg/claude-session-topics/issues/32)) ([70e1d3c](https://github.com/dreamiurg/claude-session-topics/commit/70e1d3c))
 * use rough age estimates instead of precise counts ([#34](https://github.com/dreamiurg/claude-session-topics/issues/34)) ([0da01b5](https://github.com/dreamiurg/claude-session-topics/commit/0da01b5))
 
+## [2.0.4](https://github.com/dreamiurg/claude-session-topics/compare/v2.0.3...v2.0.4) (2026-01-16)
+
+
+### Bug Fixes
+
+* include no-hooks.json for topic generation ([#50](https://github.com/dreamiurg/claude-session-topics/issues/50)) ([765b892](https://github.com/dreamiurg/claude-session-topics/commit/765b892beacd805b549d83dee7233720cbb6d9e4))
+
 ## [2.0.3](https://github.com/dreamiurg/claude-session-topics/compare/v2.0.2...v2.0.3) (2026-01-16)
 
 
