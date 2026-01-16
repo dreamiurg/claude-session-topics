@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "claude-session-topics-local",
-  "description": "Local development marketplace for claude-session-topics",
+  "name": "dreamiurg",
+  "description": "Productivity plugins for Claude Code by @dreamiurg",
   "owner": {
     "name": "dreamiurg",
     "url": "https://github.com/dreamiurg"
