@@ -21,7 +21,7 @@ Add a second line with a `custom-command` widget pointing to the plugin's topic-
   "id": "session-topic",
   "type": "custom-command",
   "rawValue": true,
-  "commandPath": "node ~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/dist/cli-display.js",
+  "commandPath": "node ~/.claude/plugins/cache/dreamiurg/claude-session-topics/*/dist/cli-display.js",
   "color": "cyan"
 }
 ```
@@ -46,7 +46,7 @@ A typical ccstatusline config with topics looks like:
         "id": "session-topic",
         "type": "custom-command",
         "rawValue": true,
-        "commandPath": "node ~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/dist/cli-display.js",
+        "commandPath": "node ~/.claude/plugins/cache/dreamiurg/claude-session-topics/*/dist/cli-display.js",
         "color": "cyan"
       }
     ]
@@ -59,7 +59,7 @@ A typical ccstatusline config with topics looks like:
 After making changes, verify everything is working by running the topic-display command:
 
 ```bash
-node ~/.claude/plugins/cache/claude-session-topics-marketplace/claude-session-topics/*/dist/cli-display.js "$CLAUDE_SESSION_ID"
+node ~/.claude/plugins/cache/dreamiurg/claude-session-topics/*/dist/cli-display.js "$CLAUDE_SESSION_ID"
 ```
 
 This should output something like `New session: gathering context` for new sessions,
