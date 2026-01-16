@@ -76,7 +76,21 @@ and add a custom command widget there.
 
 ## Troubleshooting
 
-Enable debug logging:
+### [exit:1] error in status line
+
+If you see `[exit:1]` in your status line, the plugin needs to be built:
+
+```bash
+cd ~/.claude/plugins/cache/dreamiurg/claude-session-topics/*/
+bun install  # or npm install
+bun run build  # or npm run build
+```
+
+This creates the `dist/` directory with compiled JavaScript files.
+The postinstall script should handle this automatically for npm installations,
+but marketplace installations may require manual building.
+
+### Enable debug logging
 
 ```bash
 export CLAUDE_TOPIC_DEBUG=1
