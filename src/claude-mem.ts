@@ -3,7 +3,6 @@
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import Database from 'better-sqlite3';
 import type { ClaudeMemObservation } from './types.js';
 
 const CLAUDE_MEM_DB = join(homedir(), '.claude', 'plugins', 'cache', 'claude-mem', 'claude-mem.db');
@@ -13,9 +12,10 @@ export async function getClaudeMemContext(sessionId: string, limit = 10): Promis
     return null;
   }
 
-  let db: Database.Database | null = null;
+  let db: import('better-sqlite3').Database | null = null;
 
   try {
+    const Database = (await import('better-sqlite3')).default;
     db = new Database(CLAUDE_MEM_DB, { readonly: true });
 
     // Look up memory_session_id from content_session_id
