@@ -9,6 +9,13 @@
 * auto-discover session ID from recent state files ([#32](https://github.com/dreamiurg/claude-session-topics/issues/32)) ([70e1d3c](https://github.com/dreamiurg/claude-session-topics/commit/70e1d3c))
 * use rough age estimates instead of precise counts ([#34](https://github.com/dreamiurg/claude-session-topics/issues/34)) ([0da01b5](https://github.com/dreamiurg/claude-session-topics/commit/0da01b5))
 
+## [2.0.5](https://github.com/dreamiurg/claude-session-topics/compare/v2.0.4...v2.0.5) (2026-02-20)
+
+
+### Bug Fixes
+
+* use dynamic import for better-sqlite3 to prevent crash when not installed ([#60](https://github.com/dreamiurg/claude-session-topics/issues/60)) ([0337d0e](https://github.com/dreamiurg/claude-session-topics/commit/0337d0ee8175f867ca191104ebc83cf6d7068a40))
+
 ## [2.0.4](https://github.com/dreamiurg/claude-session-topics/compare/v2.0.3...v2.0.4) (2026-01-16)
 
 
